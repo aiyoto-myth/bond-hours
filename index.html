@@ -688,9 +688,11 @@ function readLog(text, opts){
     if(h <= 0 || h > maxH){ warnings.push('Row ' + (r + 1) + ' (' + (name || email) + '): ' + round2(h) + ' looks wrong; skipped.'); continue; }
     var ev = g('event'), act = g('activity');
     out.push({name: name.replace(/\s+/g, ' '), email: email, date: g('date') || (/\d[\/\-]\d/.test(g('start')) ? g('start').replace(/\s+\d{1,2}[:.]\d{2}.*$/, '') : ''),
-              event: ev && normName(ev) !== normName(act) ? ev : '', activity: act, hours: round2(h), start: startS, how: how, long: h > 12});
+              event: ev && normName(ev) !== normName(act) ? ev : '', activity: act, hours: Math.round(h * 10000) / 10000, start: startS, how: how, long: h > 12});   // exact: 1h20 stays 1.3333 (review r3 B5)
   }
   if(dupSkipped) warnings.push('Left out ' + dupSkipped + ' row' + (dupSkipped === 1 ? '' : 's') + ' the other browser had already counted as duplicates.');
+  // a date column where any day-first value shows up (13/10) is read day-first throughout (review r3 A4)
+  if(out.some(function(e){ var m = String(e.date).match(/^(\d{1,2})[\/\-.](\d{1,2})/); return m && +m[1] > 12; })) out.forEach(function(e){ e.dmy = true; });
   if(failed > 8) warnings.push('…and ' + (failed - 8) + ' more rows skipped for unreadable hours.');
   var longN = out.filter(function(e){ return e.long; }).length;
   if(longN) warnings.push(longN + ' shift' + (longN === 1 ? ' is' : 's are') + ' longer than 12 hours. Check them in the log.');
@@ -699,13 +701,15 @@ function readLog(text, opts){
 
 var MON = {jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12};
 /* "01/16/2027", "Jan 16", "16 Jan", "2027-01-16", "Sat, Jan 16" -> "01-16" so the same day from two sheets compares equal (year ignored) */
-function dateKey(s){
+function dateKey(s, dmy){
   var t = String(s || '').trim().toLowerCase().replace(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?,?\s*/, ''), m;
-  function k(mo, d){ return (mo < 10 ? '0' : '') + mo + '-' + (d < 10 ? '0' : '') + d; }
-  if((m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return k(+m[2], +m[3]);
-  if((m = t.match(/^(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.]\d{2,4})?$/))) return +m[1] <= 12 ? k(+m[1], +m[2]) : k(+m[2], +m[1]);
-  if((m = t.match(/^([a-z]{3})[a-z]*\.?\s+(\d{1,2})/)) && MON[m[1]]) return k(MON[m[1]], +m[2]);
-  if((m = t.match(/^(\d{1,2})\s+([a-z]{3})/)) && MON[m[2]]) return k(MON[m[2]], +m[1]);
+  t = t.replace(/[ t]+\d{1,2}[:.]\d{2}(:\d{2})?(\s*[ap]\.?m\.?)?$/, '').replace(/(\d)(st|nd|rd|th)\b/g, '$1').trim();   // "10/5/2025 0:00:00", "5th October"
+  if(!t || /^(tbd|tba|n\/?a|none|-+|\?+)$/.test(t)) return '';                                                         // placeholders are no date (review r3 A5)
+  function k(mo, d){ return mo >= 1 && mo <= 12 && d >= 1 && d <= 31 ? (mo < 10 ? '0' : '') + mo + '-' + (d < 10 ? '0' : '') + d : normName(t); }
+  if((m = t.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/))) return k(+m[2], +m[3]);
+  if((m = t.match(/^(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.]\d{2,4})?$/))) return (dmy || +m[1] > 12) ? k(+m[2], +m[1]) : k(+m[1], +m[2]);
+  if((m = t.match(/^([a-z]{3})[a-z]*\.?[\s\-]+(\d{1,2})\b/)) && MON[m[1]]) return k(MON[m[1]], +m[2]);
+  if((m = t.match(/^(\d{1,2})[\s\-]+([a-z]{3})/)) && MON[m[2]]) return k(MON[m[2]], +m[1]);
   return normName(t);
 }
 
@@ -734,13 +738,21 @@ function matchEntry(e, families, aliases){
     var byE = families.filter(function(f){ return f.emails.indexOf(email) >= 0; });
     if(byE.length === 1){
       if(byName.length === 1 && byName[0].id !== byE[0].id) return {fid: null, how: 'conflict', candidates: [byName[0].id, byE[0].id]};
-      // someone signed up another family under their own email: a full name whose surname is not in the email's family -> ask (review r2 #3)
-      var nw = n.split(' ');
-      if(!byName.length && nw.length >= 2 && nw[0].length > 1 && !famSurnames(byE[0])[nw[nw.length - 1]] && !famSurnames(byE[0])[nw.slice(1).join('')]){
-        var other = families.filter(function(f){ return f.id !== byE[0].id && famSurnames(f)[nw[nw.length - 1]]; });
-        return {fid: null, how: 'conflict', candidates: [byE[0].id].concat(other.map(function(f){ return f.id; }))};
+      // someone signed up another family under their own email -> ask (review r2 #3, r3 M1-M4)
+      var E0 = byE[0], mineS = famSurnames(E0, true), nw = n ? n.split(' ') : [];
+      if(byName.length && byName.indexOf(E0) < 0) return {fid: null, how: 'conflict', candidates: [E0.id].concat(byName.map(function(f){ return f.id; }))};
+      if(byName.length) return {fid: E0.id, how: 'email'};
+      if(nw.length){
+        var sur = surnameOf(n), comp = nw.length >= 2 ? nw.slice(1).join('') : '';
+        var other = families.filter(function(f){ if(f.id === E0.id) return false; var fs = famSurnames(f, true);
+          return (sur && fs[sur] && !mineS[sur]) || (comp && fs[comp] && !mineS[comp] && !famSurnames(E0)[comp]); });
+        if(nw.length === 1 && !other.length){                                   // a first name alone that is somebody else's parent, nobody's here
+          var fn = nw[0];
+          if(firstNames(E0).indexOf(fn) < 0) other = families.filter(function(f){ return f.id !== E0.id && f.parents.some(function(p){ return normName(p).split(' ')[0] === fn; }); });
+        }
+        if(other.length) return {fid: null, how: 'conflict', candidates: [E0.id].concat(other.map(function(f){ return f.id; }))};
       }
-      return {fid: byE[0].id, how: 'email'};
+      return {fid: E0.id, how: 'email'};
     }
   }
   if(byName.length === 1) return {fid: byName[0].id, how: 'name'};
@@ -866,34 +878,52 @@ function reckon(state){
   //  - two people of one family: count once (keep the larger) unless the rule says count each parent
   //  - rows with no date are never merged
   function drop(rec, why){ rec.counted = false; rec.why = why; dupes++; }
+  // people inside one family: same email or same full name, joined transitively (review r3 B4)
+  var pp = {};
+  function pfind(x){ while(pp[x] !== x){ pp[x] = pp[pp[x]]; x = pp[x]; } return x; }
+  cand.forEach(function(r){
+    var e = (r.entry.email || '').toLowerCase(), n = normName(r.entry.name), keys = [];
+    if(e) keys.push(r.fid + '|e:' + e); if(n) keys.push(r.fid + '|n:' + n); if(!keys.length) keys.push(r.fid + '|row' + r.idx);
+    keys.forEach(function(k){ if(pp[k] == null) pp[k] = k; });
+    for(var q = 1; q < keys.length; q++){ var a = pfind(keys[0]), b = pfind(keys[q]); if(a !== b) pp[b] = a; }
+    r.pkey = keys;
+  });
+  cand.forEach(function(r){ r.person = pfind(r.pkey[0]); });
   var groups = {};
   cand.forEach(function(rec){
-    var d = dateKey(rec.entry.date); if(!d) return;
+    var d = dateKey(rec.entry.date, rec.entry.dmy); rec.dk = d; if(!d) return;
     var k = rec.fid + '|' + d + '|' + normName(rec.entry.activity || rec.entry.event || '');
     (groups[k] = groups[k] || []).push(rec);
   });
   Object.keys(groups).forEach(function(k){
     var g = groups[k];
-    var starts = {}; g.forEach(function(r){ var c = clockOf(r.entry.start); r.sMin = c; if(c != null) starts[c] = 1; });
-    var sk = Object.keys(starts);
+    // start times: "6:00" next to "6:00 PM" is the same start (review r3 B2)
+    g.forEach(function(r){ r.clk = parseClock(r.entry.start); });
+    g.forEach(function(r){ if(r.clk && !r.clk.ap && g.some(function(o){ return o.clk && o.clk.ap && o.clk.min === (r.clk.min + 720) % 1440; })) r.clk = {min: (r.clk.min + 720) % 1440, ap: true}; r.sMin = r.clk ? r.clk.min : null; });
+    // a row without a start joins its own person's only start first, then the family's only start (review r3 B3)
+    var famStarts = {}; g.forEach(function(r){ if(r.sMin != null) famStarts[r.sMin] = 1; });
     var slots = {};
-    g.forEach(function(r){ var key = r.sMin != null ? String(r.sMin) : (sk.length === 1 ? sk[0] : sk.length === 0 ? 'none' : 'own' + r.idx); (slots[key] = slots[key] || []).push(r); });
+    g.forEach(function(r){
+      var key;
+      if(r.sMin != null) key = String(r.sMin);
+      else {
+        var mine = {}; g.forEach(function(o){ if(o.person === r.person && o.sMin != null) mine[o.sMin] = 1; });
+        var mk = Object.keys(mine), fk = Object.keys(famStarts);
+        key = mk.length === 1 ? mk[0] : mk.length > 1 ? 'own' + r.idx : (fk.length === 1 ? fk[0] : fk.length === 0 ? 'none' : 'p' + r.person);
+      }
+      (slots[key] = slots[key] || []).push(r);
+    });
     Object.keys(slots).forEach(function(sl){
-      var rows = slots[sl];
-      // people: same email or same full name = same person
-      var pid = {}, pk = [];
-      rows.forEach(function(r){
-        var e = (r.entry.email || '').toLowerCase(), n = normName(r.entry.name), hit = null;
-        pk.forEach(function(x){ if((e && x.emails[e]) || (n && x.names[n])) hit = hit || x; });
-        if(!hit){ hit = {emails: {}, names: {}, rows: []}; pk.push(hit); }
-        if(e) hit.emails[e] = 1; if(n) hit.names[n] = 1; hit.rows.push(r);
-      });
-      var units = pk.map(function(x){
+      var rows = slots[sl], byP = {};
+      rows.forEach(function(r){ (byP[r.person] = byP[r.person] || []).push(r); });
+      var units = Object.keys(byP).map(function(pk){
+        var x = {rows: byP[pk]};
         // the paste with the most rows for this slot wins (two games listed in one sheet beat one line in another); a tie goes to the later paste (a correction)
         var by = {}; x.rows.forEach(function(r){ var bb = r.entry.batch || ''; by[bb] = by[bb] || {n: 0, last: -1}; by[bb].n++; by[bb].last = Math.max(by[bb].last, r.idx); });
         var b = Object.keys(by).sort(function(p, q){ return by[q].n - by[p].n || by[q].last - by[p].last; })[0];
         x.rows.forEach(function(r){ if((r.entry.batch || '') !== b) drop(r, 'same shift in another paste'); });
         x.keep = x.rows.filter(function(r){ return r.counted; });
+        if(x.keep.length < x.rows.length) x.keep.forEach(function(r){ r.absorbed = true; });
         x.hours = x.keep.reduce(function(a, r){ return a + r.entry.hours; }, 0);
         return x;
       });
@@ -903,24 +933,24 @@ function reckon(state){
       }
     });
   });
-  // the same person, same day, same hours, from another paste, under a different job name: one shift logged twice (coordinator r2 #5)
+  // the same person, same day, same hours, from another paste, under a different job name, with no conflicting start:
+  // one shift logged twice. Each later row absorbs at most one earlier row (review r3 B1, A1)
   var day = {};
-  cand.forEach(function(r){ if(!r.counted) return; var d = dateKey(r.entry.date); if(!d) return;
-    var who = normName(r.entry.name) || (r.entry.email || '').toLowerCase(), k = r.fid + '|' + d + '|' + who;
-    (day[k] = day[k] || []).push(r); });
+  cand.forEach(function(r){ if(!r.counted || !r.dk) return; (day[r.fid + '|' + r.dk + '|' + r.person] = day[r.fid + '|' + r.dk + '|' + r.person] || []).push(r); });
   Object.keys(day).forEach(function(k){
     var rows = day[k].sort(function(a, b){ return b.idx - a.idx; });
-    rows.forEach(function(r, i){ if(!r.counted) return;
-      rows.slice(i + 1).forEach(function(o){ if(o.counted && (o.entry.batch || '') !== (r.entry.batch || '') && Math.abs(o.entry.hours - r.entry.hours) < 1e-9 && normName(o.entry.activity) !== normName(r.entry.activity))
-        drop(o, 'same day and hours as "' + (r.entry.activity || 'a shift') + '" from a later paste'); });
+    rows.forEach(function(r){ if(!r.counted || r.absorbed) return;
+      var o = rows.filter(function(o){ return o !== r && o.idx < r.idx && o.counted && !o.absorbed && (o.entry.batch || '') !== (r.entry.batch || '') && Math.abs(o.entry.hours - r.entry.hours) < 1e-9 &&
+        normName(o.entry.activity) !== normName(r.entry.activity) && !(o.sMin != null && r.sMin != null && o.sMin !== r.sMin); })[0];
+      if(o){ drop(o, 'same day and hours as "' + (r.entry.activity || 'a shift') + '" from a later paste'); r.absorbed = true; }
     });
   });
   cand.forEach(function(r){ if(!r.counted) return; var p = per[r.fid]; p.logged += r.entry.hours; if(r.atEvent){ p.eventHours += r.entry.hours; evShifts++; } });
   var out = [], tot = {families: fams.length, ret: 0, cash: 0, exempt: 0, buyout: 0, nobond: 0, short: 0, cashAmount: 0, bondHeld: 0, hoursLogged: 0, hoursMissing: 0};
   fams.forEach(function(f){
     var p = per[f.id], rc = roleCredit(f.roles, rules), req = Math.min(requiredFor(f, rules), rc.owes), bond = bondFor(f, rules);
-    var done = round2(p.logged + rc.hours), missing = round2(Math.max(0, req - done));
-    var evMin = String(rules.eventName || '').trim() ? num(rules.eventMin, 0) : 0, evMissing = round2(Math.max(0, evMin - p.eventHours));
+    var done = round2(p.logged + rc.hours), missing = req - (p.logged + rc.hours) < 1 / 60 ? 0 : round2(req - (p.logged + rc.hours));
+    var evMin = String(rules.eventName || '').trim() ? num(rules.eventMin, 0) : 0, evMissing = evMin - p.eventHours < 1 / 60 ? 0 : round2(evMin - p.eventHours);
     var status, charge = 0;
     if(rc.buyout){ status = 'buyout'; bond = 0; evMissing = 0; }
     else if(bond === 0 && req === 0){ status = 'nobond'; evMissing = 0; missing = 0; }
