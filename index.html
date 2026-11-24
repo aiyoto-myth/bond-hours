@@ -1,0 +1,1743 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bond Hours: whose volunteer bond cheque do we cash?</title>
+<meta name="description" content="Volunteer bond tracker for minor hockey, ringette and youth sports associations. Paste the family list and the volunteer log; get the cheques to hand back, the cheques to cash, and a reminder note for every family that is short. Free for one team, no sign-up.">
+<link rel="canonical" href="https://samsbench.com/bond-hours/">
+<meta property="og:title" content="Bond Hours: whose bond cheque do we cash?">
+<meta property="og:description" content="Paste families + volunteer log. Get hand-back, cash and still-short lists. Free for one team, no sign-up.">
+<meta property="og:url" content="https://samsbench.com/bond-hours/">
+<meta property="og:image" content="https://samsbench.com/bond-hours/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ice:#eef3f6; --ice2:#dde7ee; --ink:#0e1a2e; --ink2:#33445e; --line:#bfcbd8;
+  --navy:#13284b; --navy2:#1d3a68; --cheque:#e6f0e4; --cheque2:#cfe1cc; --chequeInk:#24402a;
+  --red:#c8102e; --redInk:#8d0b20; --green:#1d6b43; --amber:#a35a00; --amberBg:#fff1d6; --focus:#1d4ed8;
+  --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+select{max-width:100%}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ice);color:var(--ink);font:17px/1.5 "Atkinson Hyperlegible",system-ui,sans-serif}
+h1,h2,h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:800;line-height:1.05;margin:0;letter-spacing:.005em}
+h1{font-size:clamp(40px,7vw,76px);text-transform:uppercase}
+h2{font-size:clamp(26px,3.4vw,34px);text-transform:uppercase}
+h3{font-size:22px;font-weight:600}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* top: rink boards */
+.top{background:var(--navy);color:#fff;border-bottom:6px solid var(--red)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px}
+.brand{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:24px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none}
+.brand b{color:#ffb3bf}
+.top nav a{color:#fff;text-decoration:none;margin-left:14px;font-weight:700;font-size:15px}
+.top nav a:hover{text-decoration:underline}
+
+/* hero: a cheque */
+.hero{padding:28px 0 8px}
+.chq{position:relative;background:var(--cheque);border:2px solid var(--chequeInk);border-radius:6px;padding:22px 22px 18px;overflow:hidden;
+  background-image:repeating-radial-gradient(circle at 85% 30%,rgba(36,64,42,.07) 0 1px,transparent 1px 7px),repeating-linear-gradient(115deg,rgba(36,64,42,.05) 0 2px,transparent 2px 11px)}
+.chq .memo{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:13px;color:var(--chequeInk);border-bottom:1px solid var(--chequeInk);padding-bottom:6px;margin-bottom:14px;flex-wrap:wrap}
+.hero h1{color:var(--ink);max-width:13em}
+.hero p.lead{font-size:20px;max-width:40em;margin:14px 0 0}
+.hero .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.micr{font-family:var(--mono);letter-spacing:.2em;font-size:13px;color:var(--chequeInk);margin-top:16px}
+.stamp{display:inline-block;font-family:"Barlow Condensed",sans-serif;font-weight:800;text-transform:uppercase;letter-spacing:.08em;border:3px solid currentColor;border-radius:4px;padding:1px 8px;transform:rotate(-6deg);line-height:1.2}
+.hero .stamp{position:absolute;right:26px;bottom:22px;font-size:30px;color:var(--red);opacity:.9}
+@media (max-width:700px){.hero .stamp{position:static;display:inline-block;margin-top:10px;font-size:22px}}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--navy);background:var(--navy);color:#fff;border-radius:6px;padding:9px 16px;font-weight:700;text-decoration:none;min-height:44px}
+.btn:hover{background:var(--navy2)}
+.btn.ghost{background:#fff;color:var(--navy)}
+.btn.ghost:hover{background:var(--ice2)}
+.btn.red{background:var(--red);border-color:var(--red)}
+.btn.small{min-height:36px;padding:5px 11px;font-size:15px}
+.linkbtn{background:none;border:0;padding:0;text-decoration:underline;font-weight:700;color:var(--navy)}
+
+/* layout */
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start;margin-top:22px}
+@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}}
+.step{background:#fff;border:1px solid var(--line);border-radius:8px;margin-bottom:18px}
+.step > header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.step > header .n{flex:0 0 auto;width:38px;height:38px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:22px}
+.step > header p{margin:2px 0 0;font-size:15px}
+.step .body{padding:16px 18px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 12px}
+.field label, .lbl{font-weight:700}
+input[type=number],input[type=text],input[type=email],input[type=date],select,textarea{border:2px solid var(--line);border-radius:6px;background:#fff;padding:7px 9px;min-height:42px}
+input[type=number]{width:5.2em}
+input.money{width:6.5em}
+textarea{width:100%;min-height:150px;font-family:var(--mono);font-size:14px;line-height:1.45}
+input:focus,select:focus,textarea:focus{border-color:var(--navy)}
+.sent{line-height:2.4}
+.sent input,.sent select{margin:0 4px}
+details.more{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px}
+details.more summary{cursor:pointer;font-weight:700;color:var(--navy);padding:6px 0}
+.roles{width:100%;border-collapse:collapse;margin-top:6px}
+.roles td{padding:4px 6px 4px 0;vertical-align:middle}
+@media (max-width:640px){.roles tr{display:grid;grid-template-columns:1fr auto;gap:4px;border-bottom:1px solid var(--ice2);padding:6px 0}.roles td:first-child{grid-column:1/-1;width:auto!important}}
+.loglist .bh{background:var(--ice);font-weight:700;justify-content:space-between}
+.roles input[type=text]{width:100%}
+.warn{background:var(--amberBg);border-left:4px solid var(--amber);padding:8px 12px;margin:10px 0;font-size:15px}
+.ok{color:var(--green);font-weight:700}
+.err{color:var(--redInk);font-weight:700}
+.preview{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px}
+.preview th,.preview td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--ice2);vertical-align:top}
+.preview th{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink2)}
+.scrollx{overflow-x:auto}
+.loglist{max-height:280px;overflow:auto;border:1px solid var(--ice2);border-radius:6px;margin-top:10px}
+.loglist div{display:flex;gap:10px;align-items:center;padding:6px 10px;border-bottom:1px solid var(--ice2);font-size:15px}
+.loglist div span.w{flex:1 1 auto;min-width:0}
+.loglist button{border:0;background:none;color:var(--redInk);font-weight:700;padding:4px 8px}
+.quick{display:grid;grid-template-columns:2fr 2fr 1.2fr .8fr auto;gap:8px;align-items:end}
+.quick label{font-size:14px;font-weight:700;display:block}
+.quick input,.quick select{width:100%}
+@media (max-width:640px){.quick{grid-template-columns:1fr 1fr}.quick .go{grid-column:1/-1}}
+
+/* the cheque box (summary) */
+.box{position:sticky;top:12px;background:var(--navy);color:#fff;border-radius:8px;padding:16px 18px 18px}
+.box h2{color:#fff;font-size:28px}
+.tally{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin:12px 0 4px;align-items:baseline}
+.tally dt{font-size:16px}
+.tally dd{margin:0;font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:34px;text-align:right;line-height:1.05}
+.tally .sub{grid-column:1/-1;font-family:var(--mono);font-size:13px;color:#d9e3f0;margin:-2px 0 8px}
+.tally .r{color:#9fe0b8}.tally .c{color:#ffb3bf}.tally .s{color:#ffd58a}
+.box .need{background:#fff;color:var(--ink);border-radius:6px;padding:8px 10px;margin-top:10px;font-size:15px}
+.box .btn{background:#fff;color:var(--navy);border-color:#fff;width:100%;justify-content:center;margin-top:12px}
+.box .ex{font-size:14px;margin-top:10px;color:#d9e3f0}
+@media (max-width:960px){
+  .box{position:static}
+  .dock{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--navy);color:#fff;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 16px calc(8px + env(safe-area-inset-bottom));border-top:4px solid var(--red);font-size:15px}
+  .dock a{color:#fff;font-weight:700}
+  body{padding-bottom:84px}
+}
+@media (min-width:961px){.dock{display:none}}
+
+/* results: cheque stubs */
+.results{margin-top:8px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chip{border:2px solid var(--navy);background:#fff;color:var(--navy);border-radius:999px;padding:4px 12px;font-weight:700;min-height:36px}
+.chip[aria-pressed=true]{background:var(--navy);color:#fff}
+.bulk{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+.team{margin:18px 0 8px;display:flex;align-items:baseline;gap:10px;border-bottom:3px solid var(--navy);padding-bottom:4px}
+.team h3{font-size:24px;font-weight:800;text-transform:uppercase}
+.team span{font-family:var(--mono);font-size:14px}
+.stub{display:grid;grid-template-columns:118px minmax(0,1fr) auto;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-left:8px solid var(--line);border-radius:6px;padding:10px 14px;margin:8px 0}
+.stub.short{border-left-color:var(--red)} .stub.done{border-left-color:var(--green)} .stub.exempt{border-left-color:var(--navy2)} .stub.buyout{border-left-color:#7a869a}
+.stub .stamp{font-size:17px;justify-self:start}
+.stub.short .stamp{color:var(--red)} .stub.done .stamp{color:var(--green)} .stub.exempt .stamp{color:var(--navy2)} .stub.buyout .stamp{color:#5c6779}
+.stub .who b{font-size:18px}
+.stub .who .meta{font-size:14px;color:var(--ink2)}
+.bar{position:relative;height:10px;background:var(--ice2);border-radius:5px;margin:6px 0 2px;max-width:340px;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--green);border-radius:5px}
+.stub.short .bar i{background:var(--red)}
+.stub .fig{font-family:var(--mono);font-size:14px}
+.stub .acts{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.stub .acts select{min-height:36px;font-size:14px;padding:4px 6px}
+.stub .detail{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:8px;font-size:15px}
+.stub .detail pre{white-space:pre-wrap;font-family:var(--mono);font-size:13.5px;background:var(--ice);padding:10px;border-radius:6px;margin:8px 0}
+@media (max-width:640px){.stub{grid-template-columns:1fr}.stub .acts{flex-direction:row;flex-wrap:wrap}}
+.unm{background:var(--amberBg);border:2px solid var(--amber);border-radius:8px;padding:12px 14px;margin:14px 0}
+.unm h3{color:var(--amber);font-size:22px;text-transform:uppercase;font-weight:800}
+.unm .u{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #f0d9a8}
+.unm .u span{flex:1 1 220px}
+.locked{background:#fff;border:2px dashed var(--navy);border-radius:8px;padding:12px 14px;margin:12px 0}
+
+/* pro */
+.pro{background:#fff;border:2px solid var(--navy);border-radius:8px;padding:18px;margin:28px 0}
+.pro ul{margin:8px 0 12px;padding-left:20px}
+.price{font-family:"Barlow Condensed",sans-serif;font-weight:800;font-size:44px;line-height:1}
+.faq{margin:28px 0}
+.faq details{background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin:8px 0}
+.faq summary{cursor:pointer;font-weight:700}
+footer{margin:30px 0 20px;font-size:15px;color:var(--ink2)}
+.toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:6px;font-weight:700;z-index:30;max-width:90vw;display:none}
+.exbar{background:var(--amberBg);border:2px solid var(--amber);border-radius:8px;padding:10px 14px;margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+
+/* printing */
+#printArea{display:none}
+@media print{
+  body{background:#fff;padding:0}
+  body > *:not(#printArea){display:none!important}
+  #printArea{display:block;color:#000;font:12pt/1.35 "Atkinson Hyperlegible",Arial,sans-serif}
+  .pa-page{page-break-after:always}
+  .pa-page:last-child{page-break-after:auto}
+  .pa-page h1{font-size:22pt;text-transform:none}
+  .pa-page table{width:100%;border-collapse:collapse;margin-top:8pt}
+  .pa-page th,.pa-page td{border:1px solid #444;padding:5pt 6pt;text-align:left;vertical-align:top}
+  .pa-page td.sig{width:28%}
+  .pa-foot{margin-top:10pt;font-size:9pt}
+}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <a class="brand" href="./">Bond <b>Hours</b></a>
+  <nav><a href="#how">How it works</a><a href="#proSec">Pro</a></nav>
+</div></div>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="chq">
+      <div class="memo"><span>PAY TO THE ORDER OF: the association, March 31</span><span>MEMO: volunteer bond</span></div>
+      <h1>Whose bond cheque do we cash?</h1>
+      <p class="lead">Paste your family list and your volunteer log. Get three lists: cheques to hand back, cheques to cash, and who still owes hours, with a ready reminder for each family. Free for one team. Nothing to sign up for, and the families' names stay on this computer.</p>
+      <div class="acts">
+        <a class="btn red" href="#s1" id="goStart">Start with my association</a>
+        <a class="btn ghost" href="#results">See the example lists</a>
+      </div>
+      <div class="micr">⑆ 000200 ⑈ 8 HRS ⑆ 0331</div>
+      <span class="stamp" aria-hidden="true">Cash it?</span>
+    </div>
+  </section>
+
+  <div class="exbar" id="exBar" hidden>
+    <span><b>This is a made-up association</b> (Riverside Ringette, 16 families) so you can see the lists. Your own data replaces it.</span>
+    <button class="btn small" id="clearEx">Clear it and start mine</button>
+  </div>
+
+  <div class="grid">
+    <div>
+      <!-- STEP 1 -->
+      <section class="step" id="s1">
+        <header><span class="n">1</span><div><h2>Your bond rule</h2><p>Copy it from your policy. Most fit in one line.</p></div></header>
+        <div class="body">
+          <p class="sent">Each family owes
+            <input type="number" min="0" step="0.5" id="rFirst" aria-label="Hours for the first athlete">
+            <select id="rUnit" aria-label="Unit"><option value="hours">hours</option><option value="points">points</option><option value="shifts">shifts</option><option value="jobs">jobs</option></select>
+            for the first athlete, plus <input type="number" min="0" step="0.5" id="rExtra" aria-label="Extra per athlete"> for each extra athlete, up to
+            <input type="number" min="0" step="0.5" id="rCap" placeholder="no max" aria-label="Family maximum"> a family.</p>
+          <p class="sent">The bond cheque is $<input type="number" min="0" step="1" class="money" id="rBond" aria-label="Bond per family"> per family, plus $<input type="number" min="0" step="1" class="money" id="rBondX" aria-label="Bond per extra athlete"> per extra athlete, up to $<input type="number" min="0" step="1" class="money" id="rBondCap" placeholder="no max" aria-label="Bond maximum per family"> a family.</p>
+          <p class="sent">If a family is short:
+            <select id="rShort" aria-label="What happens when short"><option value="all">cash the whole cheque</option><option value="perhour">keep part of it</option></select>
+            <span id="perHourWrap">$<input type="number" min="0" step="1" class="money" id="rPerHour" aria-label="Dollars per missing hour"> per missing <span class="unitS">hour</span></span>.
+            Deadline <input type="date" id="rDeadline" aria-label="Deadline">.</p>
+          <details class="more" id="moreRules">
+            <summary>Lighter divisions, must-do event, roles that count</summary>
+            <p class="sent">Athletes in <input type="text" id="rLightDivs" placeholder="e.g. FUN1, U7" style="width:11em" aria-label="Lighter divisions"> owe
+              <input type="number" min="0" step="0.5" id="rLight" aria-label="Hours per athlete in lighter divisions"> <span class="unitP">hours</span> each instead.</p>
+            <p class="sent">Athletes in <input type="text" id="rNoBond" placeholder="e.g. U7, U9" style="width:11em" aria-label="Divisions with no bond"> have no bond and no <span class="unitP">hours</span>.</p>
+            <p class="sent">These jobs don't count: <input type="text" id="rExclude" placeholder="e.g. timekeeper, scorekeeper" style="width:16em" aria-label="Jobs that do not count"> <label><input type="checkbox" id="rExclEv"> not even at the must-do event</label></p>
+            <p class="sent">Every family must also put in at least <input type="number" min="0" step="0.5" id="rEventMin" aria-label="Minimum at the event"> <span class="unitP">hours</span> at
+              <input type="text" id="rEvent" placeholder="e.g. tournament, blast" style="width:11em" aria-label="Must-do event name"> (matched in the event or job name). <label><input type="checkbox" id="rEventExempt"> Exempt families too</label></p>
+            <p class="sent">Two parents of one family on the same shift:
+              <select id="rSame" aria-label="Same shift rule"><option value="once">count it once</option><option value="each">count each parent</option></select></p>
+            <p class="sent">Reminders come from <input type="text" id="rOrg" placeholder="Riverside Ringette" style="width:13em" aria-label="Association name"> and are signed <input type="text" id="rSign" placeholder="Jo Smith, volunteer coordinator" style="width:15em" aria-label="Sign-off">.</p>
+            <p class="lbl">Roles that cover the bond (put the role in the family list, or pick it on the family's line)</p>
+            <table class="roles"><tbody id="roleRows"></tbody></table>
+            <button class="linkbtn" id="addRole">+ Add a role</button>
+            <p id="ruleCounts" style="font-size:15px;margin:10px 0 0"></p>
+          </details>
+        </div>
+      </section>
+
+      <!-- STEP 2 -->
+      <section class="step" id="s2">
+        <header><span class="n">2</span><div><h2>The families</h2><p>Paste from your registration export or a spreadsheet. One row per player is fine: rows with the same email become one family.</p></div></header>
+        <div class="body">
+          <label for="famText" class="lbl">Family list (with a header row)</label>
+          <textarea id="famText" spellcheck="false" placeholder="Family, Parents, Email, Athletes, Division, Team, Role&#10;Smith, Ann & Bob Smith, ann@example.com, 2, &quot;U12, FUN1&quot;, U12 Blue,&#10;Patel, Raj Patel, raj@example.com, 1, U12, U12 Blue, Head coach"></textarea>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="readFam">Read families</button>
+            <span id="famMsg"></span>
+          </div>
+          <div id="famMap" style="font-size:15px;margin-top:8px"></div>
+          <div id="famWarn"></div>
+          <div class="scrollx" id="famPreview"></div>
+        </div>
+      </section>
+
+      <!-- STEP 3 -->
+      <section class="step" id="s3">
+        <header><span class="n">3</span><div><h2>The volunteer log</h2><p>Paste a SignUpGenius export or your team managers' sheets, or add shifts one at a time.</p></div></header>
+        <div class="body">
+          <label for="logText" class="lbl">Paste shifts (name or email, date, what, hours or start and end time)</label>
+          <textarea id="logText" spellcheck="false" placeholder="Name, Date, Activity, Hours&#10;Ann Smith, Oct 4, Bottle drive, 3&#10;Raj Patel, Oct 11, Scorekeeper, 1.5"></textarea>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="readLog">Add these shifts</button>
+            <label style="font-size:15px">Rows without hours count as <input type="number" id="rowHours" min="0" step="0.25" placeholder="—" style="width:4.5em" aria-label="Hours for rows without hours"></label>
+            <span id="logMsg"></span>
+          </div>
+          <div id="logWarn"></div>
+          <p class="lbl" style="margin-top:18px">Or add one shift</p>
+          <div class="quick">
+            <div><label for="qFam">Family</label><select id="qFam"></select></div>
+            <div><label for="qWhat">What</label><input type="text" id="qWhat" list="qWhatList" placeholder="Scorekeeper"><datalist id="qWhatList"></datalist></div>
+            <div><label for="qDate">Date</label><input type="date" id="qDate"></div>
+            <div><label for="qHrs" class="unitP">Hours</label><input type="number" id="qHrs" min="0" step="0.25" value="1"></div>
+            <div class="go"><button class="btn" id="qAdd">Add</button></div>
+          </div>
+          <details class="more" id="logBox"><summary id="logSum">The log</summary><div class="loglist" id="logList"></div>
+            <div class="row" style="margin-top:10px"><button class="btn small ghost" id="bShifts">Download shifts CSV</button><span style="font-size:15px">Every shift, the family it went to and how it was matched. A team manager sends this file to the coordinator, who pastes it here.</span></div>
+            <div id="aliasBox"></div></details>
+        </div>
+      </section>
+    </div>
+
+    <!-- the cheque box -->
+    <aside>
+      <div class="box" id="box" aria-live="polite"></div>
+    </aside>
+  </div>
+
+  <!-- RESULTS -->
+  <section class="results" id="results">
+    <h2 style="margin-top:12px">The lists</h2>
+    <div id="unmatched"></div>
+    <div class="filters" role="group" aria-label="Show">
+      <button class="chip" data-f="all" aria-pressed="true">Everyone</button>
+      <button class="chip" data-f="short" aria-pressed="false">Short / cash</button>
+      <button class="chip" data-f="done" aria-pressed="false">Hand back</button>
+      <button class="chip" data-f="exempt" aria-pressed="false">Exempt</button>
+      <button class="chip" data-f="buyout" aria-pressed="false">Bought out / no bond</button>
+    </div>
+    <div class="bulk">
+      <button class="btn small" id="bPrint">Print hand-back sheets</button>
+      <button class="btn small ghost" id="bRemind">Copy all reminders</button>
+      <button class="btn small ghost" id="bEmails">Copy emails of short families</button>
+      <button class="btn small ghost" id="bCsv">Download CSV</button>
+      <button class="btn small ghost" id="bMerge">Reminders for mail merge</button>
+    </div>
+    <div id="bulkNote"></div>
+    <div id="list"></div>
+  </section>
+
+  <section class="pro" id="proSec">
+    <h2>Bond Hours Pro: the whole association</h2>
+    <p>Free covers one team: up to <b id="freeN">25</b> families, every list, every reminder. Pro is for the person who reconciles the whole association.</p>
+    <ul>
+      <li>Any number of families and teams</li>
+      <li>Hand-back sheets for every team, the CSV for your treasurer, all reminders at once</li>
+      <li>One payment, every season after. No subscription, no per-family fee.</li>
+    </ul>
+    <div id="proBuy">
+      <div class="row"><span class="price" id="proPrice">$49</span><span>once, for your association</span></div>
+      <p style="margin-top:12px"><a class="btn red" id="buyLink" href="#" rel="noopener">Get Pro</a></p>
+      <p style="font-size:15px">Secure checkout by Whop, a payment company. Card, Apple Pay or PayPal; you get a receipt for the treasurer.</p>
+      <label for="proKey" class="lbl">Already bought? Enter the email you paid with, or a gift code.</label>
+      <div class="row" style="margin-top:6px"><input type="email" id="proKey" placeholder="you@example.com or gift code" style="flex:1 1 220px"><button class="btn ghost" id="btnUnlock">Unlock Pro</button></div>
+    </div>
+    <p id="proMsg" aria-live="polite"></p>
+    <div id="proState"></div>
+  </section>
+
+  <section class="faq" id="how">
+    <h2>How it works</h2>
+    <details><summary>Where does our families' information go?</summary><p>Nowhere. Everything you paste stays in this browser on this computer. There is no account and no server copy. Use "Download backup" below to move it to another computer or keep a copy.</p></details>
+    <details><summary>How does it match a shift to a family?</summary><p>By email, then by a parent's or player's full name. If the email says one family and the name says another, it asks. Anything else goes in the yellow "Needs you" box: you pick the family, and full names are remembered for the next paste (see "Remembered names" under the log to undo one).</p></details>
+    <details><summary>Two parents signed up for the same shift. Does it count twice?</summary><p>Your choice in step 1. Many policies count it once per family ("hours are counted for the event, not for each volunteer"). The same shift pasted twice from two sheets is also counted once.</p></details>
+    <details><summary>Coaches and managers are exempt. Assistant coaches get 6 hours. How?</summary><p>Under "roles that cover the bond" in step 1. A role can cover the whole bond, give a number of hours, or mark a family that paid the buyout (no cheque held). Put the role in the family list or pick it on the family's line.</p></details>
+    <details><summary>Can team managers use it during the season?</summary><p>Yes. Free covers a team. Add shifts after each game, then use "Download shifts CSV" under the log and send that file to the coordinator, who pastes it into step 3.</p></details>
+    <details><summary>A shift was matched by surname only. Is it counted?</summary><p>Not until you say so. "The Smiths" or "J. Garcia" shows up in the yellow box with the family it probably is; one click accepts it. Full names and emails are matched on their own.</p></details>
+    <div class="row" style="margin-top:14px">
+      <button class="btn small ghost" id="bBackup">Download backup</button>
+      <label class="btn small ghost" for="restoreFile" style="cursor:pointer">Restore a backup</label>
+      <input type="file" id="restoreFile" accept=".json,application/json" hidden>
+      <button class="btn small ghost" id="bWipe">Erase everything here</button>
+    </div>
+  </section>
+
+  <footer>Bond Hours is a small independent tool from samsbench.com. It does arithmetic on what you paste; your association's policy decides.</footer>
+</main>
+
+<div class="dock" id="dock"></div>
+<div class="toast" id="toast" role="status"></div>
+<div id="printArea"></div>
+
+<script>
+/*CORE-START*/
+var BH = (function(){
+'use strict';
+
+/* ---------- text helpers ---------- */
+function fold(s){ s = String(s == null ? '' : s); try{ s = s.normalize('NFD').replace(/[̀-ͯ]/g, ''); }catch(e){} return s; }
+function norm(s){ return fold(s).toLowerCase().replace(/[‘’']/g, '').replace(/[^a-z0-9@.+\- ]+/g, ' ').replace(/\s+/g, ' ').trim(); }
+function normName(s){
+  s = String(s == null ? '' : s).trim();
+  var m = s.match(/^([^,]+),\s*([^,]+)$/);                       // "Smith, Ann" -> "Ann Smith"
+  if(m && !/\d|@/.test(s) && m[2].trim().split(/\s+/).length <= 2) s = m[2] + ' ' + m[1];
+  return norm(s).replace(/[@.+\-]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function isEmail(s){ return /^[^\s@,;<>]+@[^\s@,;<>]+\.[a-z]{2,}$/i.test(String(s || '').trim()); }
+var PLACEHOLDER = /^(none|noemail|no-email|no\.email|na|n\/a|nomail|noreply|no-reply|test|unknown|email|x+|a)@/i;
+function emailsIn(s){
+  var m = String(s || '').match(/[^\s@,;<>()"']+@[^\s@,;<>()"']+\.[a-z]{2,}/gi);
+  return m ? m.map(function(e){ return e.toLowerCase(); }).filter(function(e){ return !PLACEHOLDER.test(e) && !/@(none|example|test|noemail)\./.test(e); }) : [];
+}
+function round2(x){ return Math.round(x * 100) / 100; }
+function tokens(s){ return norm(s).replace(/\b([a-z]{1,4})[\s\-]+(\d{1,2})\b/g, '$1$2').split(/[^a-z0-9]+/).filter(Boolean); }   // glue only codes like "FUN 1", "U-12" (review r2: not "Tournament 2027")
+function hasTokens(hay, needle){             // does the token list of needle appear contiguously in hay? ("U7 - FUN 1" has "FUN1")
+  var h = tokens(hay), n = tokens(needle); if(!n.length) return false;
+  function same(a, b){ return a === b || (a.indexOf(b) === 0 && /^\d+$/.test(a.slice(b.length)) && !/\d$/.test(b)); }   // "tournament2026" still has "tournament"
+  for(var i = 0; i + n.length <= h.length; i++){ var ok = true; for(var j = 0; j < n.length; j++) if(!same(h[i + j], n[j])){ ok = false; break; } if(ok) return true; }
+  return false;
+}
+function listMatch(text, list){ return String(list || '').split(/\s*[,;]\s*/).some(function(x){ return x.trim() && hasTokens(text, x); }); }
+
+/* ---------- table parsing (tab, comma or semicolon; quoted fields; Excel/Sheets paste) ---------- */
+function splitWith(body, delim){
+  var rows = [], row = [], cur = '', q = false, i, c;
+  for(i = 0; i < body.length; i++){
+    c = body[i];
+    if(q){ if(c === '"'){ if(body[i + 1] === '"'){ cur += '"'; i++; } else q = false; } else cur += c; }
+    else if(c === '"' && cur.trim() === ''){ q = true; cur = ''; }
+    else if(c === delim){ row.push(cur.trim()); cur = ''; }
+    else if(c === '\n'){ row.push(cur.trim()); if(row.some(function(x){ return x !== ''; })) rows.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  return rows;
+}
+function parseTable(text){
+  text = String(text || '').replace(/\r\n?/g, '\n').replace(/^﻿/, '');
+  var lines = text.split('\n').filter(function(l){ return l.trim() !== ''; });
+  if(!lines.length) return [];
+  var body = lines.join('\n') + '\n';
+  if(lines.slice(0, 5).join('\n').indexOf('\t') >= 0) return splitWith(body, '\t');
+  // comma or semicolon: pick the one whose rows have the same number of fields (more than one)
+  var best = null;
+  [',', ';'].forEach(function(d){
+    var rows = splitWith(body, d), w = rows[0] ? rows[0].length : 0, same = rows.filter(function(r){ return r.length === w; }).length;
+    var score = w > 1 ? same / rows.length + w / 1000 : 0;
+    if(!best || score > best.score) best = {rows: rows, score: score};
+  });
+  return best.rows;
+}
+
+/* Header keys in priority order; each key takes the first free column matching its patterns (earlier patterns win).
+   Phone, date-of-birth, address and money columns are never names. */
+var NOT_NAME = /phone|cell|mobile|tel\b|birth|dob|address|street|city|postal|zip|province|state|gender|amount|fee|paid|balance|discount|account|id$|\bid\b|number|#/;
+function readHeader(row){
+  var t = row.map(norm), map = {pfirst: [], plast: [], pfull: [], email: []}, taken = {};
+  function take(i){ taken[i] = 1; return i; }
+  function find(res, avoid){
+    for(var r = 0; r < res.length; r++) for(var i = 0; i < t.length; i++) if(!taken[i] && t[i] && res[r].test(t[i]) && !(avoid && avoid.test(t[i]))) return i;
+    return -1;
+  }
+  var i;
+  t.forEach(function(h, k){ if(/e-?mail/.test(h)) map.email.push(take(k)); });
+  if((i = find([/^(registration |reg )?status$|^status$|registration status/])) >= 0) map.status = take(i);
+  if((i = find([/volunteer role|bond role|bench|exempt/, /^roles?$|position|^role\b|role$/], /status/)) >= 0) map.role = take(i);
+  var ATH = /athlete|player|child|participant|skater|swimmer|kid|registrant|member/;
+  if((i = find([new RegExp('(' + ATH.source + ').*first')])) >= 0) map.afirst = take(i);
+  if((i = find([new RegExp('(' + ATH.source + ').*last')])) >= 0) map.alast = take(i);
+  // parents / guardians / contacts: "Parent 1 First Name", "Primary Contact Last", "Guardian Name"
+  var PAR = /parent|guardian|contact|mother|father|mom|dad/;
+  t.forEach(function(h, k){ if(taken[k] || NOT_NAME.test(h)) return;
+    if(PAR.test(h) && /first|given/.test(h)) map.pfirst.push(take(k));
+    else if(PAR.test(h) && /last|surname|family/.test(h)) map.plast.push(take(k));
+  });
+  t.forEach(function(h, k){ if(!taken[k] && PAR.test(h) && !NOT_NAME.test(h) && /name|^parents?$|^guardians?$|^contacts?$|^parent|^guardian/.test(h)) map.pfull.push(take(k)); });
+  if((i = find([/^(number of|no\.? of|how many|#) ?(athletes|players|kids|children|skaters|participants)?$/, /^(athletes|players|kids|children|skaters|swimmers|participants)$/, /^(athlete|player|kid|child)s? ?count$/], NOT_NAME)) >= 0) map.count = take(i);
+  if((i = find([/^family( name)?$|^household|^family/, /^surname$|^last ?name$/], NOT_NAME)) >= 0) map.family = take(i);
+  if(map.afirst == null && (i = find([/^first ?name$|^given name$/])) >= 0) map.first = take(i);
+  if((i = find([/^name$|^full name$|^volunteer$/])) >= 0) map.name = take(i);
+  if((i = find([ATH], NOT_NAME)) >= 0) map.athlete = take(i);
+  if((i = find([/division|age ?group|^level|category|^div\b|program/])) >= 0) map.division = take(i);
+  if((i = find([/team/])) >= 0) map.team = take(i);
+  var hits = Object.keys(map).filter(function(k){ return Array.isArray(map[k]) ? map[k].length : map[k] != null; }).length;
+  return {map: map, hits: hits};
+}
+
+/* ---------- families ---------- */
+/* Accepts one row per family OR one row per athlete. Rows that share any email, or the same surname + a parent, become one family.
+   Returns {families, warnings, mapping, skipped} */
+function readFamilies(text){
+  var rows = parseTable(text), warnings = [], skipped = [];
+  if(!rows.length) return {families: [], warnings: ['Nothing to read.'], mapping: '', skipped: []};
+  var hd = readHeader(rows[0]), map = hd.map, start = 1, head = rows[0];
+  var hasName = map.family != null || map.pfull.length || map.plast.length || map.alast != null || map.name != null || (map.first != null && map.family != null);
+  if(hd.hits < 2 || !hasName){
+    // No header: col 0 = family name; a cell with @ = email; a small integer = athlete count; a division-like code; else parents.
+    map = {pfirst: [], plast: [], pfull: [], email: [], family: 0}; start = 0; head = null;
+    rows[0].forEach(function(cell, i){
+      if(i === 0) return;
+      if(isEmail(cell) || emailsIn(cell).length) map.email.push(i);
+      else if(/^\d{1,2}$/.test(cell) && map.count == null) map.count = i;
+      else if(/^(u ?\d{1,2}|fun ?\d|[a-z]{0,4} ?\d{1,2}u|novice|atom|peewee|bantam|midget|tyke|petite|tween|junior|belle|open|active start)/i.test(cell) && map.division == null) map.division = i;
+      else if(!map.pfull.length && /[a-z]/i.test(cell)) map.pfull.push(i);
+      else if(map.team == null && /[a-z]/i.test(cell)) map.team = i;
+    });
+    warnings.push('No header row found, so the columns were guessed. A header (Family, Parents, Email, Athletes, Division, Team, Role) makes it certain.');
+  }
+  var mapping = describeMapping(map, head);
+  var groups = [];                               // raw rows -> candidate family records
+  for(var r = start; r < rows.length; r++){
+    var row = rows[r], g = function(k){ return map[k] != null && !Array.isArray(map[k]) ? (row[map[k]] || '').trim() : ''; };
+    var ga = function(k){ return map[k].map(function(i){ return (row[i] || '').trim(); }); };
+    if(map.status != null && /withdr|cancel|refund|wait ?list|inactive|declin|removed|deleted/i.test(g('status'))){ skipped.push(((g('afirst') + ' ' + (g('alast') || g('family'))).trim() || (g('first') + ' ' + g('family')).trim() || g('athlete') || g('family') || ('row ' + (r + 1))) + ' (' + g('status') + ')'); continue; }
+    var emails = []; ga('email').forEach(function(c){ emailsIn(c).forEach(function(e){ if(emails.indexOf(e) < 0) emails.push(e); }); });
+    var parents = [];
+    ga('pfull').forEach(function(c){ if(!/\d/.test(c)) splitPeople(c).forEach(function(p){ if(parents.indexOf(p) < 0) parents.push(p); }); });
+    var firsts = ga('pfirst'), lasts = ga('plast');
+    for(var k = 0; k < Math.max(firsts.length, lasts.length); k++){
+      var fn = (firsts[k] || '').trim(), ln = (lasts[k] || lasts[0] || '').trim();
+      if(fn && !/\d/.test(fn)){ var full = ln ? fn + ' ' + ln : fn; if(parents.indexOf(full) < 0) parents.push(full); }
+    }
+    var athleteName = (g('afirst') + ' ' + g('alast')).trim() || g('athlete');
+    var nameCol = g('name') || (g('first') ? (g('first') + ' ' + g('family')).trim() : '');
+    var fam = g('family'), guessed = false;
+    if(map.family != null && map.first != null && map.afirst == null && map.athlete == null){
+      // "First Name, Last Name" (with or without parent columns): a roster, one athlete per row (review r1 K11, r2 code #5)
+      athleteName = (g('first') + ' ' + g('family')).trim(); nameCol = '';
+    }
+    if(!fam && lasts.length && lasts[0]) fam = lasts[0];
+    if(!fam && parents.length){ var pw = parents[parents.length - 1].split(/\s+/); if(pw.length > 1) fam = pw[pw.length - 1]; }
+    if(!fam && nameCol){ var nw = normName(nameCol) ? String(nameCol).replace(/^([^,]+),\s*(.+)$/, '$2 $1').trim().split(/\s+/) : []; if(nw.length > 1){ fam = nw[nw.length - 1]; if(!parents.length) parents.push(nw.join(' ')); } else if(nw.length){ fam = nw[0]; guessed = true; } }
+    if(!fam && g('alast')) fam = g('alast');
+    if(!fam && emails.length){ fam = emails[0].split('@')[0]; guessed = true; }
+    if(!fam) continue;
+    var cnt = parseInt(g('count'), 10); if(cnt > 10){ warnings.push('Row ' + (r + 1) + ': ' + cnt + ' athletes looks wrong; counted 1.'); cnt = 1; }
+    var div = g('division'), divs = div ? div.split(/\s*[,;\/]\s*|\s+and\s+/).filter(Boolean) : [];
+    var aths = [];
+    if(athleteName) aths.push({name: athleteName, division: div});
+    else { var n = cnt > 0 ? cnt : Math.max(1, divs.length); for(var a = 0; a < n; a++) aths.push({name: '', division: divs[a] || divs[divs.length - 1] || ''}); }
+    groups.push({name: tidyFamily(fam), guessed: guessed, parents: parents, emails: emails, teams: g('team') ? [g('team')] : [], athletes: aths,
+                 roles: g('role').split(/\s*[,;\/+]\s*|\s+and\s+/).filter(function(x){ return x && !/^(none|no|n\/a|-|registered|active)$/i.test(x); }), named: !!athleteName});
+  }
+  // union rows into families: shared email, or same surname and an overlapping parent name (or both rows have no parents and no email)
+  var parent = groups.map(function(_, i){ return i; });
+  function find(i){ while(parent[i] !== i){ parent[i] = parent[parent[i]]; i = parent[i]; } return i; }
+  function unite(a, b){ a = find(a); b = find(b); if(a !== b) parent[b] = a; }
+  var byEmail = {}, byNameParent = {}, nameMerged = {};
+  groups.forEach(function(g, i){ g.emails.forEach(function(e){ if(byEmail[e] != null) unite(byEmail[e], i); else byEmail[e] = i; }); });
+  var famEmails = function(i){ var r = find(i), out = {}; groups.forEach(function(h, j){ if(find(j) === r) h.emails.forEach(function(e){ out[e] = 1; }); }); return out; };
+  groups.forEach(function(g, i){
+    var fk = normName(g.name);
+    var keys = g.parents.map(function(p){ return fk + '|' + normName(p); });
+    if(!g.parents.length && !g.emails.length) keys = [fk + '|'];
+    keys.forEach(function(k){
+      if(byNameParent[k] == null){ byNameParent[k] = i; return; }
+      var j = byNameParent[k]; if(find(i) === find(j)) return;
+      var a = famEmails(i), b = famEmails(j), ka = Object.keys(a), kb = Object.keys(b);
+      if(ka.length && kb.length && !ka.some(function(e){ return b[e]; })) return;   // two households with their own emails stay apart (review r2 code #4)
+      unite(j, i); nameMerged[find(i)] = 1;
+    });
+  });
+  var fams = {}, order = [];
+  groups.forEach(function(g, i){
+    var root = find(i), f = fams[root];
+    if(!f){ f = fams[root] = {name: g.name, guessed: g.guessed, parents: [], emails: [], teams: [], athletes: [], roles: [], surnames: []}; order.push(root); }
+    if(f.guessed && !g.guessed){ f.name = g.name; f.guessed = false; }
+    if(normName(g.name) !== normName(f.name) && !g.guessed && f.surnames.indexOf(g.name) < 0) f.surnames.push(g.name);
+    g.emails.forEach(function(e){ if(f.emails.indexOf(e) < 0) f.emails.push(e); });
+    g.parents.forEach(function(p){ if(f.parents.indexOf(p) < 0) f.parents.push(p); });
+    g.teams.forEach(function(t){ if(f.teams.indexOf(t) < 0) f.teams.push(t); });
+    g.roles.forEach(function(x){ if(!f.roles.some(function(y){ return normName(y) === normName(x); })) f.roles.push(x); });
+    g.athletes.forEach(function(a){
+      if(a.name && f.athletes.some(function(b){ return b.name && normName(b.name) === normName(a.name); })) return;   // same child listed twice
+      if(!a.name && !g.named && f.athletes.length && groups.filter(function(h, j){ return find(j) === root; }).length > 1 && !(map.count != null) && !a.division) return;
+      f.athletes.push(a);
+    });
+  });
+  var list = order.map(function(root){
+    var f = fams[root];
+    if(!f.athletes.length) f.athletes.push({name: '', division: ''});
+    if(nameMerged[root] && !f.surnames.length && f.emails.length <= 1 && groups.filter(function(h, j){ return find(j) === root && !h.emails.length; }).length && groups.filter(function(h, j){ return find(j) === root && h.emails.length; }).length) warnings.push('Joined rows for "' + f.name + '" (' + f.parents.join(', ') + ') because one row had no email. If they are two households, add an email to each.');
+    if(f.surnames.length) warnings.push('Joined "' + [f.name].concat(f.surnames).join('" and "') + '" into one family because they share ' + (f.emails.length ? 'an email' : 'a parent') + '. If they are two households, give them different emails.');
+    f.id = f.emails.length ? 'e:' + f.emails.slice().sort()[0] : 'n:' + normName(f.name) + '|' + normName(f.parents[0] || '');
+    f.team = f.teams[0] || '';
+    delete f.surnames;
+    return f;
+  });
+  // ids must be unique
+  var seenId = {};
+  list.forEach(function(f){ var id = f.id, k = 2; while(seenId[id]) id = f.id + '#' + (k++); f.id = id; seenId[id] = 1; });
+  Object.keys(nameMerged).forEach(function(){});
+  var gcount = list.filter(function(f){ return f.guessed; }).length;
+  if(gcount) warnings.push(gcount + ' famil' + (gcount === 1 ? 'y has' : 'ies have') + ' a guessed name (no surname column). Their shifts will not be matched by surname.');
+  var seen = {};
+  list.forEach(function(f){ var k = normName(f.name); seen[k] = (seen[k] || 0) + 1; });
+  Object.keys(seen).forEach(function(k){ if(seen[k] > 1) warnings.push(seen[k] + ' separate families called "' + k + '". Shifts with only that surname will ask you which one.'); });
+  if(skipped.length) warnings.push('Skipped ' + skipped.length + ' withdrawn or cancelled row' + (skipped.length === 1 ? '' : 's') + ': ' + skipped.slice(0, 5).join('; ') + (skipped.length > 5 ? '…' : '') + '.');
+  return {families: list, warnings: warnings, mapping: mapping, skipped: skipped};
+}
+function describeMapping(map, head){
+  if(!head) return '';
+  var name = function(i){ return '"' + head[i] + '"'; }, out = [];
+  if(map.family != null) out.push('family ← ' + name(map.family));
+  if(map.name != null) out.push('name ← ' + name(map.name));
+  var p = map.pfull.concat(map.pfirst, map.plast); if(p.length) out.push('parents ← ' + p.map(name).join(' + '));
+  if(map.email.length) out.push('emails ← ' + map.email.map(name).join(' + '));
+  var a = [map.afirst, map.alast, map.athlete, map.first].filter(function(x){ return x != null; }); if(a.length) out.push('athletes ← ' + a.map(name).join(' + '));
+  if(map.count != null) out.push('athlete count ← ' + name(map.count));
+  if(map.division != null) out.push('division ← ' + name(map.division));
+  if(map.team != null) out.push('team ← ' + name(map.team));
+  if(map.role != null) out.push('role ← ' + name(map.role));
+  if(map.status != null) out.push('status ← ' + name(map.status) + ' (withdrawn rows skipped)');
+  return out.join(' · ');
+}
+function tidyFamily(s){ s = String(s).trim(); return /^[a-z]/.test(s) && s === s.toLowerCase() ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+function splitPeople(s){
+  s = String(s || '').trim(); if(!s) return [];
+  var m = s.match(/^([^,&\/]+),\s*([^,&\/]+)$/);                 // "Smith, Ann" is one person
+  if(m && m[2].trim().split(/\s+/).length === 1 && m[1].trim().split(/\s+/).length === 1 && /^[A-Z]/.test(m[1].trim()) && /^[A-Z]/.test(m[2].trim()) && !/\s/.test(m[1].trim())){
+    // ambiguous: "Luis, Maria Garcia" has a space on the right, so it is two people; "Smith, Ann" has none
+    return [m[2].trim() + ' ' + m[1].trim()];
+  }
+  var m2 = s.match(/^([A-Z][^\s,&\/]+),\s*(.+(?:&|\band\b|\/).+)$/);          // "Smith, Ann & Bob" -> Ann Smith, Bob Smith
+  if(m2 && !/\s/.test(m2[2].replace(/\s*(?:&|\band\b|\/)\s*/gi, '|').replace(/\|/g, ''))) return m2[2].split(/\s*(?:&|\band\b|\/)\s*/i).filter(Boolean).map(function(x){ return x.trim() + ' ' + m2[1]; });
+  var parts = s.split(/\s*(?:&|\band\b|\/|;|\+|,)\s*/i).map(function(x){ return x.trim(); }).filter(Boolean);
+  var last = parts[parts.length - 1].split(/\s+/); last = last.length > 1 ? last[last.length - 1] : '';
+  return parts.map(function(p){ return (p.split(/\s+/).length === 1 && last && p !== last) ? p + ' ' + last : p; });
+}
+
+/* ---------- volunteer log ---------- */
+function parseHours(s){
+  s = String(s == null ? '' : s).trim().toLowerCase(); if(!s) return NaN;
+  var m = s.match(/^(\d+):(\d{2})(?::(\d{2}))?$/); if(m) return +m[1] + (+m[2]) / 60 + (+(m[3] || 0)) / 3600;
+  m = s.match(/^(\d+(?:\.\d+)?)\s*(?:m|min|mins|minutes)$/); if(m) return +m[1] / 60;
+  m = s.match(/^(\d+)\s*(?:h|hr|hrs|hours?)\s*(?:(\d+)\s*(?:m|min|mins|minutes)?)?$/); if(m) return +m[1] + (+(m[2] || 0)) / 60;
+  m = s.match(/^(\d*(?:[.,]\d+)?|\d+[.,]?)\s*(?:h|hr|hrs|hours?|pts?|points?|shifts?|jobs?)?$/); if(m && m[1] !== '' && m[1] !== '.') return parseFloat(m[1].replace(',', '.'));
+  return NaN;
+}
+/* minutes after midnight, and whether am/pm was given. Accepts "6:30 PM", "18:15", "11.30 am", "noon", "11/02 6:00 PM", "2025-11-02 18:00". */
+function parseClock(s){
+  s = String(s || '').trim().toLowerCase();
+  s = s.replace(/^\d{4}-\d{1,2}-\d{1,2}[ t]?/, '').replace(/^\d{1,2}[\/\-]\d{1,2}(?:[\/\-]\d{2,4})?\s*/, '').replace(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*,?\s*/, '').trim();
+  if(/^noon$|^12 ?noon$|^midday$/.test(s)) return {min: 720, ap: true};
+  if(/^midnight$/.test(s)) return {min: 0, ap: true};
+  var m = s.match(/^(\d{1,2})(?:[:.](\d{2}))?(?::\d{2})?\s*(am|pm|a\.m\.|p\.m\.|a|p)?$/);
+  if(!m) return null;
+  var h = +m[1], mi = +(m[2] || 0), ap = m[3];
+  if(h > 23 || mi > 59 || (ap && h > 12)) return null;
+  if(ap){ if(h === 12) h = 0; if(ap[0] === 'p') h += 12; }
+  return {min: h * 60 + mi, ap: !!ap || h > 12 || h === 0};
+}
+function span(a, b){     // hours between two clocks; null if it cannot be right
+  if(!a || !b) return null;
+  var opts = [];
+  [0, 720].forEach(function(da){ [0, 720].forEach(function(db){
+    if((da && a.ap) || (db && b.ap)) return;                 // only shift a side that had no am/pm
+    var x = (a.min + da) % 1440, y = (b.min + db) % 1440, d = y - x; if(d <= 0) d += 1440;
+    opts.push(d);
+  }); });
+  if(a.min === b.min && a.ap === b.ap) return null;
+  var best = Math.min.apply(null, opts);                     // "10:00 AM" to "2:00": 4 hours, not 16 (review r2 code #10)
+  return best >= 1440 ? null : best / 60;
+}
+var SUMMARY_HEAD = /required|missing|^bond$|keep\/charge|^return$/;
+function readLog(text, opts){
+  opts = opts || {};
+  var rows = parseTable(text), warnings = [], out = [], errors = [];
+  if(!rows.length) return {entries: [], warnings: ['Nothing to read.'], errors: []};
+  var t = rows[0].map(norm);
+  if(t.filter(function(h){ return SUMMARY_HEAD.test(h); }).length >= 2) return {entries: [], warnings: [], errors: ['This is a Bond Hours summary (family totals), not a list of shifts. Paste the shifts instead: in the other browser use "Download shifts CSV".']};
+  var map = {}, taken = {};
+  function take(k, res, avoid){ for(var r = 0; r < res.length; r++) for(var i = 0; i < t.length; i++) if(!taken[i] && t[i] && res[r].test(t[i]) && !(avoid && avoid.test(t[i]))){ map[k] = i; taken[i] = 1; return; } }
+  take('email', [/e-?mail/]);
+  take('first', [/first/]);
+  take('last', [/last|surname/]);
+  take('hours', [/^hours?$|^hrs$|hours|credit|^points?$|duration|^total$/], /date|time|start|end/);
+  take('range', [/^time$|^times$|time slot|^slot time/]);
+  take('start', [/start.*time|^start$|^from$|time in|begin/]);
+  take('end', [/end.*time|^end$|^to$|time out|finish/]);
+  take('date', [/date/, /^day$|when/]);
+  take('event', [/^sign ?up$|sign ?up name|^event$|^tournament$/]);
+  take('activity', [/^item$|activity|job|task|slot|shift|description|position|role|duty|^what$/, /event|sign ?up/]);
+  take('name', [/name|volunteer|who|person|family|parent/], /sign ?up/);
+  var hits = Object.keys(map).length;
+  var start = 1;
+  if(hits < 2){
+    map = {}; start = 0;
+    rows[0].forEach(function(cell, i){
+      if(isEmail(cell)) { if(map.email == null) map.email = i; }
+      else if(!isNaN(parseHours(cell)) && map.hours == null && !/\d[\/\-]\d/.test(cell)) map.hours = i;
+      else if((/^\d{1,4}[\/\-.]\d{1,2}([\/\-.]\d{1,4})?$/.test(cell) || /^(mon|tue|wed|thu|fri|sat|sun|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?,? \d/i.test(cell)) && map.date == null) map.date = i;
+      else if(map.name == null) map.name = i;
+      else if(map.activity == null) map.activity = i;
+    });
+    warnings.push('No header row found; guessed: ' + Object.keys(map).map(function(k){ return k + ' = column ' + (map[k] + 1); }).join(', ') + '.');
+  }
+  var haveHours = map.hours != null || map.range != null || (map.start != null && map.end != null);
+  var dflt = parseHours(opts.rowHours);
+  if(!haveHours && !(dflt > 0)) return {entries: [], warnings: warnings, errors: ['No hours column and no start/end times, so the hours are unknown. Add an Hours column, or fill in "rows without hours count as" and paste again.']};
+  var maxH = opts.maxHours || 24, failed = 0, dupSkipped = 0;
+  var cCounted = t.indexOf('counted'), isShifts = cCounted >= 0 && t.indexOf('matched by') >= 0;
+  for(var r = start; r < rows.length; r++){
+    var row = rows[r], g = function(k){ return map[k] != null ? (row[map[k]] || '').trim() : ''; };
+    if(isShifts && /^no: same/i.test(row[cCounted] || '')){ dupSkipped++; continue; }   // the other browser already set these aside (review r2 code #2)
+    var name = (g('first') + ' ' + g('last')).trim() || g('name');
+    var email = emailsIn(g('email'))[0] || emailsIn(name)[0] || '';
+    if(!name && !email) continue;
+    var h = NaN, how = 'col', startS = g('start');
+    if(map.hours != null && g('hours') !== '') h = parseHours(g('hours'));
+    if(isNaN(h) && map.range != null && g('range')){
+      var parts = g('range').split(/\s*(?:-|–|—|to)\s*/i);
+      if(parts.length === 2){ var pa = parseClock(parts[0]), pb = parseClock(parts[1]); if(pa && pb && !pa.ap && pb.ap) pa.ap = true, pa.min = (pb.min >= 720 && pa.min < 720 && pa.min + 720 < pb.min) ? pa.min + 720 : pa.min; var sp = span(pa, pb); if(sp != null){ h = sp; how = 'times'; startS = parts[0]; } }
+    }
+    if(isNaN(h) && map.start != null && map.end != null && (g('start') || g('end'))){
+      var sp2 = span(parseClock(g('start')), parseClock(g('end')));
+      if(sp2 != null){ h = sp2; how = 'times'; }
+    }
+    if(isNaN(h)){
+      if(dflt > 0 && !g('hours') && !g('start') && !g('range')){ h = dflt; how = 'default'; }
+      else { failed++; if(failed <= 8) warnings.push('Row ' + (r + 1) + ' (' + (name || email) + '): could not work out the hours from "' + [g('hours'), g('range'), g('start'), g('end')].filter(Boolean).join(' / ') + '"; skipped.'); continue; }
+    }
+    if(h <= 0 || h > maxH){ warnings.push('Row ' + (r + 1) + ' (' + (name || email) + '): ' + round2(h) + ' looks wrong; skipped.'); continue; }
+    var ev = g('event'), act = g('activity');
+    out.push({name: name.replace(/\s+/g, ' '), email: email, date: g('date') || (/\d[\/\-]\d/.test(g('start')) ? g('start').replace(/\s+\d{1,2}[:.]\d{2}.*$/, '') : ''),
+              event: ev && normName(ev) !== normName(act) ? ev : '', activity: act, hours: round2(h), start: startS, how: how, long: h > 12});
+  }
+  if(dupSkipped) warnings.push('Left out ' + dupSkipped + ' row' + (dupSkipped === 1 ? '' : 's') + ' the other browser had already counted as duplicates.');
+  if(failed > 8) warnings.push('…and ' + (failed - 8) + ' more rows skipped for unreadable hours.');
+  var longN = out.filter(function(e){ return e.long; }).length;
+  if(longN) warnings.push(longN + ' shift' + (longN === 1 ? ' is' : 's are') + ' longer than 12 hours. Check them in the log.');
+  return {entries: out, warnings: warnings, errors: errors};
+}
+
+var MON = {jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12};
+/* "01/16/2027", "Jan 16", "16 Jan", "2027-01-16", "Sat, Jan 16" -> "01-16" so the same day from two sheets compares equal (year ignored) */
+function dateKey(s){
+  var t = String(s || '').trim().toLowerCase().replace(/^(mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?,?\s*/, ''), m;
+  function k(mo, d){ return (mo < 10 ? '0' : '') + mo + '-' + (d < 10 ? '0' : '') + d; }
+  if((m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return k(+m[2], +m[3]);
+  if((m = t.match(/^(\d{1,2})[\/\-.](\d{1,2})(?:[\/\-.]\d{2,4})?$/))) return +m[1] <= 12 ? k(+m[1], +m[2]) : k(+m[2], +m[1]);
+  if((m = t.match(/^([a-z]{3})[a-z]*\.?\s+(\d{1,2})/)) && MON[m[1]]) return k(MON[m[1]], +m[2]);
+  if((m = t.match(/^(\d{1,2})\s+([a-z]{3})/)) && MON[m[2]]) return k(MON[m[2]], +m[1]);
+  return normName(t);
+}
+
+/* ---------- matching log rows to families ---------- */
+/* Order: a choice made for this very row (e.fid) > unique email (unless the full name clearly says another family) > unique full name
+   > a remembered name or email > surname suggestion (never credited without a click). Returns {fid, how, candidates[]} */
+function lastToken(n){ var w = n.split(' '); return w[w.length - 1]; }
+function surnameOf(n){       // "the smiths" / "smith family" / "j smith" / "ann smith" -> "smith"; single word -> that word
+  var w = n.split(' ').filter(function(x){ return ['the', 'family', 'fam', 'familys', 'families', 'household'].indexOf(x) < 0; });
+  if(!w.length) return '';
+  var s = w[w.length - 1];
+  if(/^the /.test(n) && /s$/.test(s)) return s;            // "the smiths": try with and without the s below
+  return s;
+}
+function famSurnames(f, parts){
+  var s = {}; if(!f.guessed){ s[normName(f.name).replace(/\s/g, '')] = 1; if(parts) normName(f.name).split(' ').forEach(function(w){ if(w.length > 2 && normName(f.name).split(' ').length > 1) s[w] = 1; }); }
+  [].concat(f.parents, f.athletes.map(function(a){ return a.name; })).forEach(function(p){ var w = normName(p).split(' '); if(w.length > 1) s[w.slice(1).join('')] = 1; if(w.length === 2) s[w[1]] = 1; if(parts && /-/.test(p)) String(p).split(/\s+/).slice(1).join(' ').split(/[-\s]+/).forEach(function(x){ x = normName(x); if(x.length > 2) s[x] = 1; }); });
+  return s;
+}
+function matchEntry(e, families, aliases){
+  aliases = aliases || {};
+  if(e.fid && famById(families, e.fid)) return {fid: e.fid, how: 'chosen'};
+  var email = (e.email || '').toLowerCase(), n = normName(e.name);
+  var byName = !n ? [] : families.filter(function(f){ return f.parents.some(function(p){ return normName(p) === n; }) || f.athletes.some(function(a){ return a.name && normName(a.name) === n; }); });
+  if(email){
+    var byE = families.filter(function(f){ return f.emails.indexOf(email) >= 0; });
+    if(byE.length === 1){
+      if(byName.length === 1 && byName[0].id !== byE[0].id) return {fid: null, how: 'conflict', candidates: [byName[0].id, byE[0].id]};
+      // someone signed up another family under their own email: a full name whose surname is not in the email's family -> ask (review r2 #3)
+      var nw = n.split(' ');
+      if(!byName.length && nw.length >= 2 && nw[0].length > 1 && !famSurnames(byE[0])[nw[nw.length - 1]] && !famSurnames(byE[0])[nw.slice(1).join('')]){
+        var other = families.filter(function(f){ return f.id !== byE[0].id && famSurnames(f)[nw[nw.length - 1]]; });
+        return {fid: null, how: 'conflict', candidates: [byE[0].id].concat(other.map(function(f){ return f.id; }))};
+      }
+      return {fid: byE[0].id, how: 'email'};
+    }
+  }
+  if(byName.length === 1) return {fid: byName[0].id, how: 'name'};
+  if(email && aliases['e:' + email] && famById(families, aliases['e:' + email])) return {fid: aliases['e:' + email], how: 'saved'};
+  if(n && aliases['n:' + n] && famById(families, aliases['n:' + n])) return {fid: aliases['n:' + n], how: 'saved'};
+  if(byName.length > 1) return {fid: null, how: 'ambiguous', candidates: byName.map(function(f){ return f.id; })};
+  if(!n) return {fid: null, how: 'none', candidates: []};
+  var s = surnameOf(n); if(!s || s.length < 2) return {fid: null, how: 'none', candidates: []};
+  var tries = [s], ww = n.split(' '); if(ww.length >= 3) tries.push(ww.slice(-2).join(''));
+  if(/s$/.test(s) && /^the |s family$/.test(n + ' ')) tries.push(s.replace(/e?s$/, ''), s.slice(0, -1));
+  if(/^the /.test(n) && /s$/.test(s)) tries.push(s.slice(0, -1), s.replace(/es$/, ''));
+  var bySur = families.filter(function(f){ var fs = famSurnames(f, ww.length >= 2); return tries.some(function(x){ return fs[x]; }); });   // hyphen parts only when a given name is there too
+  // a given name that is nobody in the suggested family makes it a weak guess: listed, never in "accept all" (review r2 #8)
+  var given = ww.length >= 2 && ww[0].length > 1 && ['the', 'mr', 'mrs', 'ms', 'dr'].indexOf(ww[0]) < 0 ? ww[0] : '';
+  var weak = given && bySur.length === 1 && firstNames(bySur[0]).length && firstNames(bySur[0]).indexOf(given) < 0;
+  return {fid: null, how: bySur.length ? (weak ? 'weak' : 'suggest') : 'none', candidates: bySur.map(function(f){ return f.id; })};
+}
+function firstNames(f){ return [].concat(f.parents, f.athletes.map(function(a){ return a.name; })).map(function(p){ return normName(p).split(' ')[0]; }).filter(function(x){ return x && x.length > 1; }); }
+function clockOf(s){ var c = parseClock(s); return c ? c.min : null; }
+function famById(families, id){ for(var i = 0; i < families.length; i++) if(families[i].id === id) return families[i]; return null; }
+function entryKey(e){ return e.email ? 'e:' + e.email.toLowerCase() : 'n:' + normName(e.name); }
+/* A name worth remembering for future pastes: a given name plus a surname (not "Smith family", not "J. Smith", not one word). */
+function specificName(n){ n = normName(n); var w = n.split(' '); return w.length >= 2 && w[0].length > 1 && ['the', 'mr', 'mrs', 'ms', 'dr'].indexOf(w[0]) < 0 && w.indexOf('family') < 0; }
+
+/* After the family list is pasted again, carry choices from old ids to new ones. Returns {map: {old: new}, lost: [old names]} */
+function migrateIds(oldFams, newFams){
+  var map = {}, lost = [];
+  oldFams.forEach(function(o){
+    var spread = newFams.filter(function(f){ return o.emails.some(function(e){ return f.emails.indexOf(e) >= 0; }) || o.parents.some(function(p){ return f.parents.some(function(q){ return normName(p) === normName(q); }); }); });
+    if(spread.length > 1){ lost.push(o.name); return; }        // one old family became two: don't guess which one gets the choices (review r2 code #6)
+    var hit = newFams.filter(function(f){ return f.id === o.id; })[0] ||
+              newFams.filter(function(f){ return o.emails.some(function(e){ return f.emails.indexOf(e) >= 0; }); })[0];
+    if(!hit){
+      var c = newFams.filter(function(f){ return normName(f.name) === normName(o.name) && (!o.parents.length || o.parents.some(function(p){ return f.parents.some(function(q){ return normName(p) === normName(q); }); })); });
+      if(c.length === 1) hit = c[0];
+    }
+    if(hit) map[o.id] = hit.id; else lost.push(o.name);
+  });
+  return {map: map, lost: lost};
+}
+
+/* ---------- rules ---------- */
+var DEFAULT_RULES = {
+  unit: 'hours',
+  first: 8, extra: 0, cap: '',            // hours for the first athlete, each extra athlete, family maximum ('' = none)
+  lightDivs: '', light: 4,                // divisions with a lighter requirement and its hours per athlete
+  noBondDivs: '',                         // divisions with no bond and no hours (e.g. U7)
+  excludeActs: '', excludeAtEvent: false,  // activities that do not count (e.g. timekeeper, scorekeeper); by default they still count at the must-do event
+  eventName: '', eventMin: 0, eventExempt: false,   // a must-do event, its minimum per family, and whether exempt families must do it too
+  sameShift: 'once',                      // two parents of one family on the same shift: 'once' or 'each'
+  bondFirst: 200, bondExtra: 0, bondCap: '',        // bond per family (first athlete), per extra athlete, family maximum
+  shortRule: 'all', perHour: 25,          // short: cash 'all' of the bond, or charge perHour per missing hour (up to the bond)
+  deadline: '', org: '', signoff: '',
+  roles: [                                 // credit: 'full' = bond met; a number = hours credited; 'buyout' = paid instead, no cheque
+    {name: 'Head coach', credit: 'full'},
+    {name: 'Team manager', credit: 'full'},
+    {name: 'Board member', credit: 'full'},
+    {name: 'Assistant coach', credit: 6},
+    {name: 'Team treasurer', credit: 4},
+    {name: 'Bought out', credit: 'buyout'}
+  ]
+};
+function num(x, d){ var n = parseFloat(x); return isFinite(n) ? n : d; }
+function isLightDiv(div, rules){ return !!div && listMatch(div, rules.lightDivs); }
+function isNoBondDiv(div, rules){ return !!div && listMatch(div, rules.noBondDivs); }
+function requiredFor(f, rules){
+  var first = num(rules.first, 0), extra = num(rules.extra, 0), light = num(rules.light, 0), total = 0, usedFirst = false;
+  var ath = f.athletes.filter(function(a){ return !isNoBondDiv(a.division, rules); });
+  // heavier athletes first so the "first athlete" figure goes to a non-light athlete
+  ath.sort(function(a, b){ return isLightDiv(a.division, rules) - isLightDiv(b.division, rules); });
+  ath.forEach(function(a){
+    var isL = isLightDiv(a.division, rules);
+    if(!usedFirst){ total += isL ? light : first; usedFirst = true; }
+    else total += isL ? Math.min(light, extra) : extra;   // a younger sibling in a lighter division never raises the total above a regular one
+  });
+  var cap = String(rules.cap).trim() === '' ? Infinity : num(rules.cap, Infinity);
+  return round2(Math.min(total, cap));
+}
+function bondFor(f, rules){
+  var n = f.athletes.filter(function(a){ return !isNoBondDiv(a.division, rules); }).length;
+  if(!n) return 0;
+  var b = num(rules.bondFirst, 0) + num(rules.bondExtra, 0) * (n - 1);
+  var cap = String(rules.bondCap == null ? '' : rules.bondCap).trim() === '' ? Infinity : num(rules.bondCap, Infinity);
+  return round2(Math.min(b, cap));
+}
+function roleCredit(roles, rules){
+  var full = false, buyout = false, hrs = 0, used = [], owes = Infinity;
+  (roles || []).forEach(function(r){
+    var def = null; (rules.roles || []).forEach(function(x){ if(normName(x.name) && normName(x.name) === normName(r)) def = x; });
+    if(!def) return;
+    used.push(def.name);
+    if(def.credit === 'full') full = true;
+    else if(def.credit === 'buyout') buyout = true;
+    else if(def.owes) owes = Math.min(owes, num(def.credit, 0));   // "owes N instead" (review r2 #11)
+    else hrs += num(def.credit, 0);
+  });
+  return {full: full, buyout: buyout, hours: round2(hrs), used: used, owes: owes};
+}
+
+/* ---------- the reckoning ---------- */
+/* state: {families, entries, aliases, rules}. Each entry may carry fid (chosen by hand) and batch (which paste it came from).
+   Duplicates: the same family, date, activity (and start, when both rows have one) count once when they come from two different people
+   (if sameShift = 'once') or from the same person in two different pastes (always). Rows without a date are never merged. */
+function reckon(state){
+  var rules = state.rules || DEFAULT_RULES, fams = state.families || [], aliases = state.aliases || {};
+  var per = {}, unmatched = [], dupes = 0, excluded = 0, longs = 0, evShifts = 0;
+  fams.forEach(function(f){ per[f.id] = {fam: f, logged: 0, entries: [], eventHours: 0}; });
+  // pass 1: match every row to a family; rows in jobs that don't count are set aside
+  var cand = [];
+  (state.entries || []).forEach(function(e, idx){
+    var m = matchEntry(e, fams, aliases);
+    if(!m.fid){ unmatched.push({idx: idx, entry: e, how: m.how, candidates: m.candidates || []}); return; }
+    var p = per[m.fid], rec = {idx: idx, entry: e, how: m.how, counted: true, why: '', fid: m.fid};
+    p.entries.push(rec);
+    if(e.long) longs++;
+    rec.atEvent = !!(String(rules.eventName || '').trim() && listMatch((e.event || '') + ' ' + (e.activity || ''), rules.eventName));
+    if(rules.excludeActs && !(rec.atEvent && !rules.excludeAtEvent) && listMatch((e.event || '') + ' ' + (e.activity || ''), rules.excludeActs)){ rec.counted = false; rec.why = 'does not count'; excluded++; return; }
+    cand.push(rec);
+  });
+  // pass 2: duplicates, independent of paste order (review r2 code #1, #3, #7, #8; coordinator #4, #5)
+  //  - same family + same day (any date format) + same job; start times split it into slots (a row with no start joins the slot only if there is exactly one)
+  //  - one person: the latest paste wins; rows inside that paste all count (two games on one day)
+  //  - two people of one family: count once (keep the larger) unless the rule says count each parent
+  //  - rows with no date are never merged
+  function drop(rec, why){ rec.counted = false; rec.why = why; dupes++; }
+  var groups = {};
+  cand.forEach(function(rec){
+    var d = dateKey(rec.entry.date); if(!d) return;
+    var k = rec.fid + '|' + d + '|' + normName(rec.entry.activity || rec.entry.event || '');
+    (groups[k] = groups[k] || []).push(rec);
+  });
+  Object.keys(groups).forEach(function(k){
+    var g = groups[k];
+    var starts = {}; g.forEach(function(r){ var c = clockOf(r.entry.start); r.sMin = c; if(c != null) starts[c] = 1; });
+    var sk = Object.keys(starts);
+    var slots = {};
+    g.forEach(function(r){ var key = r.sMin != null ? String(r.sMin) : (sk.length === 1 ? sk[0] : sk.length === 0 ? 'none' : 'own' + r.idx); (slots[key] = slots[key] || []).push(r); });
+    Object.keys(slots).forEach(function(sl){
+      var rows = slots[sl];
+      // people: same email or same full name = same person
+      var pid = {}, pk = [];
+      rows.forEach(function(r){
+        var e = (r.entry.email || '').toLowerCase(), n = normName(r.entry.name), hit = null;
+        pk.forEach(function(x){ if((e && x.emails[e]) || (n && x.names[n])) hit = hit || x; });
+        if(!hit){ hit = {emails: {}, names: {}, rows: []}; pk.push(hit); }
+        if(e) hit.emails[e] = 1; if(n) hit.names[n] = 1; hit.rows.push(r);
+      });
+      var units = pk.map(function(x){
+        // the paste with the most rows for this slot wins (two games listed in one sheet beat one line in another); a tie goes to the later paste (a correction)
+        var by = {}; x.rows.forEach(function(r){ var bb = r.entry.batch || ''; by[bb] = by[bb] || {n: 0, last: -1}; by[bb].n++; by[bb].last = Math.max(by[bb].last, r.idx); });
+        var b = Object.keys(by).sort(function(p, q){ return by[q].n - by[p].n || by[q].last - by[p].last; })[0];
+        x.rows.forEach(function(r){ if((r.entry.batch || '') !== b) drop(r, 'same shift in another paste'); });
+        x.keep = x.rows.filter(function(r){ return r.counted; });
+        x.hours = x.keep.reduce(function(a, r){ return a + r.entry.hours; }, 0);
+        return x;
+      });
+      if(rules.sameShift !== 'each' && units.length > 1){
+        units.sort(function(a, b){ return b.hours - a.hours || b.keep[0].idx - a.keep[0].idx; });
+        units.slice(1).forEach(function(x){ x.keep.forEach(function(r){ drop(r, 'same shift, counted once per family'); }); });
+      }
+    });
+  });
+  // the same person, same day, same hours, from another paste, under a different job name: one shift logged twice (coordinator r2 #5)
+  var day = {};
+  cand.forEach(function(r){ if(!r.counted) return; var d = dateKey(r.entry.date); if(!d) return;
+    var who = normName(r.entry.name) || (r.entry.email || '').toLowerCase(), k = r.fid + '|' + d + '|' + who;
+    (day[k] = day[k] || []).push(r); });
+  Object.keys(day).forEach(function(k){
+    var rows = day[k].sort(function(a, b){ return b.idx - a.idx; });
+    rows.forEach(function(r, i){ if(!r.counted) return;
+      rows.slice(i + 1).forEach(function(o){ if(o.counted && (o.entry.batch || '') !== (r.entry.batch || '') && Math.abs(o.entry.hours - r.entry.hours) < 1e-9 && normName(o.entry.activity) !== normName(r.entry.activity))
+        drop(o, 'same day and hours as "' + (r.entry.activity || 'a shift') + '" from a later paste'); });
+    });
+  });
+  cand.forEach(function(r){ if(!r.counted) return; var p = per[r.fid]; p.logged += r.entry.hours; if(r.atEvent){ p.eventHours += r.entry.hours; evShifts++; } });
+  var out = [], tot = {families: fams.length, ret: 0, cash: 0, exempt: 0, buyout: 0, nobond: 0, short: 0, cashAmount: 0, bondHeld: 0, hoursLogged: 0, hoursMissing: 0};
+  fams.forEach(function(f){
+    var p = per[f.id], rc = roleCredit(f.roles, rules), req = Math.min(requiredFor(f, rules), rc.owes), bond = bondFor(f, rules);
+    var done = round2(p.logged + rc.hours), missing = round2(Math.max(0, req - done));
+    var evMin = String(rules.eventName || '').trim() ? num(rules.eventMin, 0) : 0, evMissing = round2(Math.max(0, evMin - p.eventHours));
+    var status, charge = 0;
+    if(rc.buyout){ status = 'buyout'; bond = 0; evMissing = 0; }
+    else if(bond === 0 && req === 0){ status = 'nobond'; evMissing = 0; missing = 0; }
+    else if(rc.full && !(rules.eventExempt && evMissing > 0)){ status = 'exempt'; missing = 0; evMissing = 0; }
+    else {
+      if(rc.full) missing = 0;
+      if(missing <= 0 && evMissing <= 0) status = 'done';
+      else {
+        var miss = Math.max(missing, evMissing);
+        charge = rules.shortRule === 'perhour' ? round2(Math.min(bond, Math.ceil(miss * 4) / 4 * num(rules.perHour, 0))) : bond;
+        status = 'short';                                  // hours are missing even when the rule charges nothing
+      }
+    }
+    tot.hoursLogged += p.logged; tot.bondHeld += bond;
+    if(status === 'done') tot.ret++; else if(status === 'exempt') tot.exempt++; else if(status === 'buyout') tot.buyout++; else if(status === 'nobond') tot.nobond++;
+    else { tot.short++; tot.cashAmount += charge; tot.hoursMissing += Math.max(missing, evMissing); }
+    out.push({id: f.id, fam: f, required: req, logged: round2(p.logged), credit: rc.full ? 0 : rc.hours, creditRoles: rc.used, done: done, missing: missing,
+              eventHours: round2(p.eventHours), eventMissing: evMissing, bond: bond, status: status, charge: charge,
+              returnAmount: round2(status === 'short' ? Math.max(0, bond - charge) : bond), entries: p.entries});
+  });
+  tot.hoursLogged = round2(tot.hoursLogged); tot.cashAmount = round2(tot.cashAmount); tot.bondHeld = round2(tot.bondHeld); tot.hoursMissing = round2(tot.hoursMissing);
+  tot.cash = tot.short; tot.evShifts = evShifts; tot.dupes = dupes; tot.excluded = excluded; tot.longs = longs; tot.unmatched = unmatched.length;
+  tot.suggest = unmatched.filter(function(u){ return u.how === 'suggest' && u.candidates.length === 1; }).length;
+  return {families: out, totals: tot, unmatched: unmatched};
+}
+
+/* ---------- outputs ---------- */
+function fmtH(x){ x = round2(x); return (x % 1 === 0 ? String(x) : x.toFixed(2).replace(/0$/, '')); }
+function money(x, cur){ x = round2(x); return (cur || '$') + (x % 1 === 0 ? x.toLocaleString('en-US') : x.toFixed(2)); }
+function deadlinePassed(rules, now){ var d = new Date((rules.deadline || '') + 'T23:59:59'); return !isNaN(d) && d < (now || new Date()); }
+function reminderText(r, rules, now){
+  var u = rules.unit || 'hours', f = r.fam, org = (rules.org || '').trim(), passed = deadlinePassed(rules, now);
+  var dl = rules.deadline ? niceDate(rules.deadline) : 'the end of the season';
+  var hi = f.parents.length ? 'Hi ' + f.parents.map(function(p){ return p.split(' ')[0]; }).join(' and ') + ',' : 'Hi ' + f.name + ' family,';
+  var lines = [hi, ''], head = (passed ? 'Volunteer bond' : 'A quick volunteer bond update') + (org ? ' from ' + org : '') + ': ';
+  var exempt = r.creditRoles.length && r.missing <= 0 && r.credit === 0;     // covered by a role, only the event is left
+  if(exempt) lines.push(head + 'your bond is covered by your role (' + r.creditRoles.join(', ') + ').');
+  else if(r.missing <= 0) lines.push(head + 'all ' + fmtH(r.required) + ' of your volunteer ' + u + ' are done' + (r.credit ? ' (including ' + fmtH(r.credit) + ' for ' + r.creditRoles.join(', ') + ')' : '') + '. Thank you!');
+  else lines.push(head + 'we have ' + fmtH(r.done) + ' of your ' + fmtH(r.required) + ' volunteer ' + u + ' recorded' + (r.credit ? ' (including ' + fmtH(r.credit) + ' for ' + r.creditRoles.join(', ') + ')' : '') + '.');
+  var need = [];
+  if(r.missing > 0) need.push(fmtH(r.missing) + ' ' + u);
+  if(r.eventMissing > 0) need.push(fmtH(r.eventMissing) + ' ' + u + ' at the ' + String(rules.eventName).split(/\s*[,;]\s*/)[0]);
+  if(need.length) lines.push(passed ? 'The deadline (' + dl + ') has passed with ' + need.join(' and ') + ' still missing.' : 'Still to do before ' + dl + ': ' + need.join(' and ') + '.');
+  var counted = r.entries.filter(function(x){ return x.counted; }), not = r.entries.filter(function(x){ return !x.counted; });
+  function line(x){ var e = x.entry; return '- ' + [e.date, [e.event, e.activity].filter(Boolean).join(' ') || 'volunteer shift', fmtH(e.hours) + ' ' + u].filter(Boolean).join(', ') + (e.name ? ' (' + e.name + ')' : ''); }
+  if(counted.length){ lines.push('', 'What we have on file:'); counted.forEach(function(x){ lines.push(line(x)); }); }
+  if(not.length){ lines.push('', 'Not counted:'); not.forEach(function(x){ lines.push(line(x) + ': ' + x.why); }); }
+  lines.push('');
+  if(r.bond > 0 && r.charge > 0){
+    if(passed) lines.push(r.charge >= r.bond ? 'Under our bond policy the ' + money(r.bond) + ' bond will be cashed.' : 'Under our bond policy ' + money(r.charge) + ' of the ' + money(r.bond) + ' bond will be kept.');
+    else lines.push(r.charge >= r.bond ? 'If this is not done by ' + dl + ', the ' + money(r.bond) + ' bond is cashed.' : 'If nothing changes by ' + dl + ', ' + money(r.charge) + ' of the ' + money(r.bond) + ' bond is kept.');
+  }
+  lines.push('If we have missed something you did, reply with the date and what it was.', '', 'Thank you!');
+  if((rules.signoff || '').trim()) lines.push(rules.signoff.trim());
+  return lines.join('\n');
+}
+function niceDate(iso){
+  var m = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/); if(!m) return iso;
+  return ['January','February','March','April','May','June','July','August','September','October','November','December'][+m[2] - 1] + ' ' + (+m[3]) + ', ' + m[1];
+}
+function csvCell(c){ c = String(c == null ? '' : c); if(/^[=+\-@\t\r]/.test(c)) c = "'" + c; return /[",\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }
+function statusWord(r, rules, now){ return {done: 'Hand back', exempt: 'Exempt (' + r.creditRoles.join(', ') + ')', buyout: 'Bought out', nobond: 'No bond', short: deadlinePassed(rules, now) || !rules.deadline ? (r.charge > 0 ? (r.charge >= r.bond ? 'Cash' : 'Keep part') : 'Short, no charge') : 'Short'}[r.status]; }
+function reasonOf(r, rules){
+  var u = rules.unit || 'hours', out = [];
+  if(r.status === 'buyout') return 'paid the buyout';
+  if(r.status === 'nobond') return 'no bond in this division';
+  if(r.status === 'exempt') return 'covered by role';
+  if(r.missing > 0) out.push(fmtH(r.missing) + ' ' + u + ' missing');
+  if(r.eventMissing > 0) out.push(fmtH(r.eventMissing) + ' ' + u + ' missing at ' + rules.eventName);
+  return out.join('; ') || 'requirement met';
+}
+function toCSV(res, rules, now){
+  var u = rules.unit || 'hours', ev = String(rules.eventName || '').trim();
+  var head = ['Family', 'Family ID', 'Parents', 'Emails', 'Teams', 'Athletes', 'Divisions', 'Required ' + u, 'Logged ' + u, 'Role credit', 'Done', 'Missing ' + u].concat(ev ? ['Event ' + u, 'Event required'] : []).concat(['Status', 'Reason', 'Bond', 'Return', 'Keep/charge']);
+  var rows = [head].concat(res.families.map(function(r){
+    var f = r.fam;
+    return [f.name, f.id, f.parents.join(' & '), f.emails.join(' '), (f.teams || [f.team]).join(' / '), f.athletes.map(function(a){ return a.name; }).filter(Boolean).join(' & ') || f.athletes.length,
+            f.athletes.map(function(a){ return a.division; }).filter(Boolean).join(' / '), r.required, r.logged, r.credit, r.done, r.missing].concat(ev ? [r.eventHours, num(rules.eventMin, 0)] : [])
+            .concat([statusWord(r, rules, now), reasonOf(r, rules), r.bond, r.returnAmount, r.charge]);
+  }));
+  return rows.map(function(row){ return row.map(csvCell).join(','); }).join('\n') + '\n';
+}
+/* every shift with how it was matched: the audit trail, and the file a team manager sends the coordinator (it reads back in step 3;
+   rows this browser counted as duplicates are skipped on the way back in) */
+function shiftsCSV(res, state){
+  var rows = [['Name', 'Email', 'Date', 'Event', 'Activity', 'Hours', 'Start', 'Family', 'Family ID', 'Counted', 'Matched by', 'Paste']];
+  res.families.forEach(function(r){ r.entries.forEach(function(x){ var e = x.entry; rows.push([e.name, e.email, e.date, e.event, e.activity, e.hours, e.start, r.fam.name, r.fam.id, x.counted ? 'yes' : 'no: ' + x.why, x.how, e.batch]); }); });
+  res.unmatched.forEach(function(x){ var e = x.entry; rows.push([e.name, e.email, e.date, e.event, e.activity, e.hours, e.start, '', '', 'no: no family', x.how, e.batch]); });
+  return rows.map(function(row){ return row.map(csvCell).join(','); }).join('\n') + '\n';
+}
+
+return {parseTable: parseTable, readFamilies: readFamilies, readLog: readLog, parseHours: parseHours, parseClock: parseClock, span: span, matchEntry: matchEntry,
+        entryKey: entryKey, specificName: specificName, migrateIds: migrateIds, requiredFor: requiredFor, bondFor: bondFor, reckon: reckon, reminderText: reminderText,
+        toCSV: toCSV, shiftsCSV: shiftsCSV, statusWord: statusWord, reasonOf: reasonOf, fmtH: fmtH, money: money, niceDate: niceDate, deadlinePassed: deadlinePassed, DEFAULT_RULES: DEFAULT_RULES,
+        normName: normName, dateKey: dateKey, listMatch: listMatch, splitPeople: splitPeople, emailsIn: emailsIn, hasTokens: hasTokens};
+})();
+if(typeof module !== 'undefined') module.exports = BH;
+/*CORE-END*/
+</script>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var SITE = 'https://samsbench.com/bond-hours/';
+var APP_KEY = 'bond-hours';
+var VERIFY_URL = 'https://app-bizz-api.whop.site/api/verify';
+var CHECKOUT_HOME = 'https://whop.com/checkout/ch_7AiBDNtDIA3dkqL/';      // one-time, returns to SITE?bought=1#proSec
+var CHECKOUT_PLAN = 'https://whop.com/checkout/plan_qbsRAsUQjLa0c';      // same price; used with ?a=<affiliate>
+var PRICE = '$49';
+var GIFT = ['a23484d8cb223018e903ee2285edc79e241fbc7af7bc9d5f04b701c0eb62167e','cc152913246215536285c28785c001c743f23dc19608a5beae4d16218bb9db91','f5152066107b6601facfbd42a51f5a8e290809fe2176acceb2f51c2c3137746c','b4a325cb6c6bd50def416956cbc64947305b3f551bb0cea8dc234028f6948721','4c2d779b22e2b5c6b362c8662fc921261b8bc81ff1aeda955eaa22e5c231a7bf','59ba277c123a7fef934ea744dc5428e06ec303a5c7b6148aa7f17a5be4b7c80d','624fced48079fbf90d6c611cfecfd11f8012850fea9748cb5b0b2f7fda104593','02959e477b4d19d0d13b435798ca68a979d94189cf0fbd7e484f024fd2e0f1d6','9455bd3f2037fd741c8d4a789415f967fe3d0d7ea5f7ebec5d1c99377072d374','a9f1ea531cf866443d62465c28f794427c80d983828ad97b6ccbb104c4be5e5e','c16b2e2589c0224b722103848d9aa5810b984a4a5c58f4bf191678ca163d108f','139b28f91c76b095db797e1ae536fd7b41d16ed2469617886f5734a1c2c9decf','293b2280dba5a3333a6b42f7765ad4b8271d5db5507ea0eabddbd924bfebcd83','cb2932bd8339ab7e82305d527793abf05f1da71a86254c1550a38331e77384b0','11f4db68155e53aa90bbe91db0747dd802c61ac1f7fb26df53f81922555a5a4f','cf29dcc217fad88976beb2fa8282516ec2df1f8099cc34cd875faa9036c539ac','9d19f336054060538c1cd7b99e25329c1598a8f28a6ec1ebc7d8291dd44859c2','4fefa713d9814948ec6d8f5d5443b0b4a4d14d7e5dfb4f3b978ff55a6bbc26f3','3ce18fa26650712692b026b602f9a42febd3fb1ece73a42d2c14055ac69bd02c','d4a4730c19ff9a3daacde084476398316e044cca0be8816e427bb2c5dd4042d0','abb3e8a34314afea66cfb3177759054bfeea4fe3501fcaef833f17bb18d89f36','2ef65d4073e3c0dd5194a9e3e16ed4852262afeb6b86a4caa82502fbf624252f','a28ba6b3823c48427888311b4d665c95ed443e8cb27007f49d6ccb7fa23cbdec','470881884c1c7a5792ffd63a7281a9793488c5113018958f09f61fd679e7ecbb','692abe6b8d7dde30eb1d6916743829ff303fa2cf15555f0e70002ce73da37b31','f33a19bfd57ea829b78566e7980bf835670eca4344410a325146a1bfc9f8c815','d1417e9a5a9f92f47542f40bcc70f3d66a9ddd5e4297e16373abcefd8b38747a','9122ccf50a151528adbb826e294d295bd37a57de2a75e9218c0243170317151a','6dbc2db03ef73ed5532f2eb98ffacb9f7687a8f4979622c5c070357cb4c548d0','87347e281d734b3d1fc7211cfa869bd7019a17ad85f0b9127d440310db10b7d8','37463ced557f5fb957ac32299a28dcea5dd9ee91e720c71617aa388d5604d3df','360ef5a39f29e2d39b4c6705eba6e8332e5c41959f739087f2409c15b9c4a6cf','e0c9ff9a545419c4a4c0e9a506f5c81d43968fb37278f94972c1865c857fec79','dd9d8c3a762ec1f17a017f83b2397f2774f6fe7bc04b112fa09dc88e02d89db3','6d10c20ba3171b489e1cc147f621ce8157e997706dc371167933fc8281923396','7308a5b5cff717fc293856091e4175ae98bbd41c8ae2093d7aa5e951d3aa0663','0eccc0d02e3860c1fbddbb2b186560598d2ac0a80042c5fc1f2c613a51e04cf8','dcdac1587b4d36db8f3e9afe5b806303bdd79b8bda4522e74dddeb9f87f37453','43dee28704b68c033f74a13f6136219f6e7c0cab5e9f3f333f57d3766807a492','42ff5976ddfebe43713e673cf020e08496b2a3076c393f95e6f3a167061b10f2','54b4079dcc67469ed45de9c5779f1ed181b4e52861103c1425d84ca166bc8324','13e916ee35c8fc3b4660666c2032b1200ae15cf2481a54116f9072125bb1d0f4','be0fc82906bd206304042bbc1fd0c2bd31c27547bccf6fce2e78d4f356073111','dad15b1379d3992d413df0c88e23094d40662c99ceb227c04d067ab810fdfe31','0b8ce9fb07c5e25c7c76478fd5912e05e2ef6aaf6fe4ea0624ca357a05f2efae','728adec53a2415a37d4dec5dc3beee50f18c723b1dad8f3879228fb183d07bfa','46988b8a6a54b913b0521bcd235c98529d6a768cb5bd18dc6e278fcbd323d302','6d5282fd7a976ec5e37fcb48a7871c7b49ccac07db19d8fece0ce5604c1a41b5','3ab96e4971a398e7672f67e07d7c46880584d7b59aeeb04c79bdca56779bee5a','90838840235c0a64a6eadb4aa4c82461b468ef195bcd73ebda264b389584a481'];                         // SHA-256 of gift codes handed out in letters (codes never go in the page)
+var KEY = 'bh.v1', PROKEY = 'bh.pro', ONCEKEY = 'bh.once', FREE_FAMILIES = 25;
+
+/* ---------- storage helpers ---------- */
+function lsGet(k, d){ try{ var t = localStorage.getItem(k); return t ? JSON.parse(t) : d; }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+
+/* ---------- measurement (GoatCounter). The ?via code follows the visitor down the funnel (kept 60 days). ---------- */
+var GC_CODE = 'bondhours';
+var SRC = (function(){ try{
+  var q = new URLSearchParams(location.search), v = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20) || (q.get('a') ? 'aff' : '');
+  if(v){ localStorage.setItem('bh.src', JSON.stringify({v: v, t: Date.now()})); return v; }
+  var o = JSON.parse(localStorage.getItem('bh.src') || 'null');
+  return (o && Date.now() - o.t < 60 * 864e5) ? o.v : '';
+}catch(e){ return ''; } })();
+var FUNNEL_EV = {'bought-return':1, 'tool-start':1, 'families-read':1, 'log-read':1, 'reckoned':1, 'lists-used':1, 'return-visit':1, 'pro-view':1, 'pro-limit':1, 'buy-click':1, 'pro-unlocked':1, 'pro-gift':1};
+var SELFTEST_EVENTS = ['bought-return', 'tool-start', 'families-read', 'log-read', 'reckoned', 'lists-used', 'return-visit', 'pro-view', 'pro-limit', 'buy-click', 'pro-unlocked', 'pro-gift',
+  'hours-added', 'unmatched-fixed', 'role-set', 'rules-edit', 'reminder-copy', 'reminders-all', 'emails-copy', 'csv', 'merge-csv', 'shifts-csv', 'print-sheets', 'backup', 'restore', 'clear-example', 'pro-notfound'];
+var ONCE = {}, QUEUE = [], SENDING = false, GC_READY = 0, GC_WAIT = 0;
+var SKIP = (function(){ try{ return localStorage.getItem('skipgc') === 't'; }catch(e){ return false; } })();   // hand testing: set localStorage.skipgc = 't'
+/* Hits leave one at a time, 700 ms apart: GoatCounter's /count takes about 4 a second per visitor and drops the rest (bizz-handbell, 11-24). */
+function track(name){
+  if(SKIP) return;
+  try{ if(SRC && FUNNEL_EV[name]) QUEUE.push(name + '.' + SRC); QUEUE.push(name); drain(); }catch(e){}
+}
+function drain(){
+  if(SENDING || !QUEUE.length) return;
+  if(!(window.goatcounter && window.goatcounter.count)){
+    if(GC_WAIT > 40){ QUEUE = []; return; }                    // blocked by an ad blocker: give up after ~16 s instead of spinning
+    GC_WAIT++; SENDING = true; setTimeout(function(){ SENDING = false; drain(); }, 400); return;
+  }
+  if(!GC_READY){ GC_READY = Date.now(); }
+  if(Date.now() - GC_READY < 1500){ SENDING = true; setTimeout(function(){ SENDING = false; drain(); }, 1500 - (Date.now() - GC_READY)); return; }
+  var n = QUEUE.shift(); SENDING = true;
+  try{ window.goatcounter.count({path: n, title: n, event: true}); }catch(e){}
+  setTimeout(function(){ SENDING = false; drain(); }, 700);
+}
+function trackOnce(name){ if(ONCE[name]) return; ONCE[name] = 1; track(name); }
+/* once per browser, ever: the funnel counts people, not clicks (review r1 K23) */
+function trackFirst(name){
+  if(S && S.example) return;
+  var o = lsGet(ONCEKEY, {}); if(o[name]) return;
+  o[name] = Date.now(); lsSet(ONCEKEY, o); track(name);
+}
+
+/* ---------- state ---------- */
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function blank(){ return {v: 1, rules: clone(BH.DEFAULT_RULES), families: [], entries: [], aliases: {}, roleSet: {}, famText: '', example: false, edited: {}, batches: [], deleted: {}}; }
+function strArr(a){ return Array.isArray(a) ? a.filter(function(x){ return typeof x === 'string'; }).map(function(x){ return x.slice(0, 200); }) : []; }
+function valid(st){
+  if(!st || typeof st !== 'object' || st.v !== 1 || !st.rules || typeof st.rules !== 'object' || !Array.isArray(st.families) || !Array.isArray(st.entries)) return false;
+  var d = BH.DEFAULT_RULES;
+  Object.keys(d).forEach(function(k){ if(st.rules[k] == null) st.rules[k] = clone(d[k]); });
+  if(!Array.isArray(st.rules.roles)) st.rules.roles = clone(d.roles);
+  st.rules.roles = st.rules.roles.filter(function(r){ return r && typeof r.name === 'string'; }).slice(0, 40);
+  st.rules.roles.forEach(function(r){ if(r.credit !== 'full' && r.credit !== 'buyout') r.credit = Math.max(0, +r.credit || 0); r.owes = !!r.owes && typeof r.credit === 'number'; if(!r.owes) delete r.owes; });
+  ['unit', 'lightDivs', 'noBondDivs', 'excludeActs', 'eventName', 'deadline', 'org', 'signoff', 'sameShift', 'shortRule'].forEach(function(k){ st.rules[k] = String(st.rules[k] == null ? '' : st.rules[k]).slice(0, 200); });
+  st.families = st.families.filter(function(f){ return f && typeof f.id === 'string' && typeof f.name === 'string'; }).slice(0, 5000);
+  st.families.forEach(function(f){
+    f.parents = strArr(f.parents); f.emails = strArr(f.emails); f.roles = strArr(f.roles); f.teams = strArr(f.teams); f.team = String(f.team || f.teams[0] || '');
+    if(!f.teams.length && f.team) f.teams = [f.team];
+    f.athletes = (Array.isArray(f.athletes) ? f.athletes : []).filter(function(a){ return a && typeof a === 'object'; }).map(function(a){ return {name: String(a.name || ''), division: String(a.division || '')}; });
+    if(!f.athletes.length) f.athletes = [{name: '', division: ''}];
+  });
+  st.entries = st.entries.filter(function(e){ return e && typeof e === 'object' && (e.name || e.email) && isFinite(+e.hours) && +e.hours > 0; }).slice(0, 50000);
+  st.entries.forEach(function(e){ e.hours = +e.hours; ['name', 'email', 'date', 'event', 'activity', 'start', 'batch'].forEach(function(k){ e[k] = String(e[k] || ''); }); if(e.fid != null && typeof e.fid !== 'string') delete e.fid; });
+  if(!st.aliases || typeof st.aliases !== 'object' || Array.isArray(st.aliases)) st.aliases = {};
+  Object.keys(st.aliases).forEach(function(k){ if(typeof st.aliases[k] !== 'string') delete st.aliases[k]; });
+  if(!st.roleSet || typeof st.roleSet !== 'object' || Array.isArray(st.roleSet)) st.roleSet = {};
+  Object.keys(st.roleSet).forEach(function(k){ st.roleSet[k] = strArr(st.roleSet[k]); });
+  st.famText = String(st.famText || '').slice(0, 400000);
+  st.example = !!st.example;
+  if(!st.edited || typeof st.edited !== 'object' || Array.isArray(st.edited)) st.edited = {};
+  st.batches = (Array.isArray(st.batches) ? st.batches : []).filter(function(b){ return b && typeof b.id === 'string'; }).map(function(b){ return {id: b.id, label: String(b.label || '').slice(0, 80), at: +b.at || 0}; });
+  if(!st.deleted || typeof st.deleted !== 'object' || Array.isArray(st.deleted)) st.deleted = {};
+  return true;
+}
+var S = lsGet(KEY, null), RETURNING = false;
+if(!valid(S)) S = example(); else if(!S.example && S.families.length) RETURNING = true;
+var PRO = lsGet(PROKEY, {});
+function isPro(){ return !!(PRO && (PRO.email || PRO.gift)); }
+function save(){ if(!lsSet(KEY, S)) say('This browser would not save. Use "Download backup" so nothing is lost.'); }
+function started(){ trackFirst('tool-start'); }
+/* leaving the example: the example's families and shifts go; its rules go too unless they were edited (review r1 K29) */
+function leaveExample(){
+  if(!S.example) return;
+  var old = S.rules, ed = S.edited || {};
+  S = blank();
+  // only the rule fields the visitor changed come along; the example's name, sign-off and deadline never do (review r2 code #9)
+  Object.keys(ed).forEach(function(k){ if(['org', 'signoff', 'deadline'].indexOf(k) < 0 && old[k] != null){ S.rules[k] = clone(old[k]); S.edited[k] = 1; } });
+  if($('famText').value === exampleFamText()) $('famText').value = '';
+  $('exBar').hidden = true;
+}
+
+/* families as used for the reckoning: the role list on the family's line (roleSet) wins over the pasted role column */
+function rolesOf(f){ return S.roleSet[f.id] ? S.roleSet[f.id] : f.roles; }
+function fams(){ return S.families.map(function(f){ var g = Object.assign({}, f); g.roles = rolesOf(f); return g; }); }
+/* free: whole teams, in order, up to 25 families (review r1 C8) */
+function freeIds(){
+  if(isPro() || S.example || S.families.length <= FREE_FAMILIES) return null;
+  var byTeam = {}, order = [];
+  S.families.forEach(function(f){ var t = f.team || ''; if(!byTeam[t]){ byTeam[t] = []; order.push(t); } byTeam[t].push(f.id); });
+  var keep = {}, n = 0;
+  order.sort().forEach(function(t){ if(n + byTeam[t].length <= FREE_FAMILIES){ byTeam[t].forEach(function(id){ keep[id] = 1; }); n += byTeam[t].length; } });
+  if(!n){ S.families.slice(0, FREE_FAMILIES).forEach(function(f){ keep[f.id] = 1; }); }
+  return keep;
+}
+var RES = null;
+function recompute(){
+  RES = BH.reckon({rules: S.rules, families: fams(), entries: S.entries, aliases: S.aliases});
+  if(!S.example && S.families.length >= 5 && S.entries.length >= 1) trackFirst('reckoned');
+}
+
+/* ---------- example: Riverside Ringette (made up) ---------- */
+function exampleFamText(){
+  return [
+    'Player First\tPlayer Last\tDivision\tTeam\tParent\tEmail\tRole',
+    'Emma\tSmith\tU12\tU12 Blue\tAnn & Bob Smith\tsmiths@example.com\t',
+    'Liam\tSmith\tFUN1\tFUN1\tAnn & Bob Smith\tsmiths@example.com\t',
+    'Noah\tPatel\tU12\tU12 Blue\tRaj Patel\traj.patel@example.com\tHead coach',
+    'Ava\tNguyen\tU12\tU12 Blue\tLinh Nguyen\tlinh.n@example.com\t',
+    'Mia\tGarcia\tU12\tU12 Blue\tLuis & Maria Garcia\tgarcias@example.com\t',
+    'Zoe\tOkafor\tU12\tU12 Blue\tChidi Okafor\tokafor@example.com\tBought out',
+    'Lily\tTremblay\tU12\tU12 Blue\tJulie Tremblay\tjtremblay@example.com\t',
+    'Ella\tMacDonald\tU14\tU14 Red\tFiona MacDonald\tfiona.mac@example.com\tTeam manager',
+    'Chloe\tWong\tU14\tU14 Red\tKevin Wong\tkwong@example.com\t',
+    'Grace\tWong\tU12\tU12 Blue\tKevin Wong\tkwong@example.com\t',
+    'Ruby\tSingh\tU14\tU14 Red\tHarpreet Singh\thsingh@example.com\tAssistant coach',
+    'Maya\tBouchard\tU14\tU14 Red\tMarc Bouchard\tmarcb@example.com\t',
+    'Sofia\tLee\tU14\tU14 Red\tSam Lee\tsamlee@example.com\t',
+    'Ivy\tKowalski\tU14\tU14 Red\tAnna Kowalski\takowalski@example.com\t',
+    'Nora\tBrown\tFUN1\tFUN1\tTom Brown\ttbrown@example.com\t',
+    'Hazel\tMartin\tFUN1\tFUN1\tClaire Martin\tcmartin@example.com\t',
+    'Leah\tCampbell\tFUN1\tFUN1\tDerek Campbell\tdcampbell@example.com\t',
+    'Aria\tMorin\tU14\tU14 Red\tSophie Morin\tsmorin@example.com\t'
+  ].join('\n');
+}
+function example(){
+  var st = blank();
+  st.example = true;
+  st.rules = Object.assign(clone(BH.DEFAULT_RULES), {first: 8, extra: 4, cap: 16, lightDivs: 'FUN1', light: 4, bondFirst: 200, bondExtra: 0, shortRule: 'all', deadline: nextMarch31(), org: 'Riverside Ringette', signoff: 'Jo, volunteer coordinator'});
+  st.famText = exampleFamText();
+  st.families = BH.readFamilies(st.famText).families;
+  var log = [
+    'Sign Up,Start Date,Start Time,End Time,Item,First Name,Last Name,Email',
+    'Home games,10/05,9:00 AM,10:30 AM,Scorekeeper,Ann,Smith,smiths@example.com',
+    'Home games,10/05,9:00 AM,10:30 AM,Scorekeeper,Bob,Smith,',
+    'Home games,10/19,9:00 AM,10:30 AM,Shot clock,Linh,Nguyen,linh.n@example.com',
+    'Bottle drive,10/26,10:00 AM,2:00 PM,Bottle sorting,Linh,Nguyen,linh.n@example.com',
+    'Home games,11/02,6:00 PM,7:30 PM,Timekeeper,Luis,Garcia,',
+    'Bottle drive,10/26,10:00 AM,2:00 PM,Bottle sorting,Maria,Garcia,garcias@example.com',
+    'Home games,11/09,6:00 PM,7:30 PM,Scorekeeper,Julie,Tremblay,jtremblay@example.com',
+    'Home games,11/16,6:00 PM,7:30 PM,Scorekeeper,Kevin,Wong,kwong@example.com',
+    'Bottle drive,10/26,10:00 AM,2:00 PM,Bottle sorting,Kevin,Wong,kwong@example.com',
+    'Tournament,01/17,8:00 AM,2:00 PM,Canteen,Kevin,Wong,kwong@example.com',
+    'Home games,11/16,6:00 PM,7:30 PM,Shot clock,Harpreet,Singh,',
+    'Bottle drive,10/26,10:00 AM,2:00 PM,Bottle sorting,Marc,Bouchard,marcb@example.com',
+    'Tournament,01/17,8:00 AM,4:00 PM,Tournament desk,Marc,Bouchard,marcb@example.com',
+    'Home games,10/12,9:00 AM,10:30 AM,Timekeeper,Sam,Lee,',
+    'Tournament,01/17,8:00 AM,12:00 PM,Canteen,Tom,Brown,tbrown@example.com',
+    'Home games,11/23,9:00 AM,10:30 AM,Scorekeeper,Claire,Martin,cmartin@example.com',
+    'Bottle drive,10/26,10:00 AM,2:00 PM,Bottle sorting,Claire,Martin,cmartin@example.com',
+    'Home games,11/30,9:00 AM,10:30 AM,Shot clock,Dee,Campbell,',
+    'Tournament,01/17,8:00 AM,4:00 PM,Tournament desk,Sophie,Morin,smorin@example.com',
+    'Home games,12/07,9:00 AM,10:30 AM,Timekeeper,Anna,K,',
+    'Bottle drive,10/26,10:00 AM,2:00 PM,Bottle sorting,Anna,Kowalski,akowalski@example.com',
+    'Bottle drive,10/26,10:00 AM,2:00 PM,Bottle sorting,Ann,Smith,smiths@example.com',
+    'Tournament,01/17,8:00 AM,12:00 PM,Canteen,Bob,Smith,',
+    'Tournament,01/17,8:00 AM,12:00 PM,Canteen,Linh,Nguyen,linh.n@example.com',
+    'Tournament,01/17,12:00 PM,4:00 PM,Tournament desk,Maria,Garcia,garcias@example.com',
+    'Bottle drive,10/26,10:00 AM,2:00 PM,Bottle sorting,Julie,Tremblay,jtremblay@example.com',
+    'Bottle drive,10/26,10:00 AM,2:00 PM,Bottle sorting,Sam,Lee,samlee@example.com',
+    'Home games,11/30,6:00 PM,7:30 PM,Shot clock,Sam,Lee,samlee@example.com'
+  ].join('\n');
+  st.entries = BH.readLog(log).entries;
+  st.entries.forEach(function(e){ e.batch = 'ex'; });
+  return st;
+}
+function nextMarch31(){ var d = new Date(), y = d.getMonth() >= 3 ? d.getFullYear() + 1 : d.getFullYear(); return y + '-03-31'; }
+
+/* ---------- step 1: rules ---------- */
+function unitWord(n){ var u = S.rules.unit || 'hours'; return n === 1 ? u.replace(/s$/, '') : u; }
+function renderRules(){
+  var r = S.rules;
+  $('rFirst').value = r.first; $('rExtra').value = r.extra; $('rCap').value = r.cap; $('rUnit').value = r.unit;
+  $('rBond').value = r.bondFirst; $('rBondX').value = r.bondExtra; $('rBondCap').value = r.bondCap; $('rShort').value = r.shortRule; $('rPerHour').value = r.perHour;
+  $('rDeadline').value = r.deadline || ''; $('rLightDivs').value = r.lightDivs; $('rLight').value = r.light; $('rNoBond').value = r.noBondDivs; $('rExclude').value = r.excludeActs;
+  $('rEvent').value = r.eventName; $('rEventMin').value = r.eventMin || ''; $('rEventExempt').checked = !!r.eventExempt; $('rExclEv').checked = !!r.excludeAtEvent; $('rSame').value = r.sameShift;
+  $('rOrg').value = r.org || ''; $('rSign').value = r.signoff || '';
+  $('perHourWrap').hidden = r.shortRule !== 'perhour';
+  renderUnitWords();
+  renderRoles();
+}
+function renderUnitWords(){
+  Array.prototype.forEach.call(document.querySelectorAll('.unitS'), function(e){ e.textContent = unitWord(1); });
+  Array.prototype.forEach.call(document.querySelectorAll('.unitP'), function(e){ e.textContent = e.tagName === 'LABEL' ? cap1(unitWord(2)) : unitWord(2); });
+}
+function cap1(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+function renderRoles(){
+  $('roleRows').innerHTML = S.rules.roles.map(function(r, i){
+    var kind = r.credit === 'full' ? 'full' : r.credit === 'buyout' ? 'buyout' : r.owes ? 'owes' : 'hours';
+    return '<tr><td style="width:46%"><input type="text" data-role-name="' + i + '" value="' + esc(r.name) + '" aria-label="Role name"></td>' +
+      '<td><select data-role-kind="' + i + '" aria-label="What the role gives"><option value="full"' + (kind === 'full' ? ' selected' : '') + '>covers the bond</option>' +
+      '<option value="hours"' + (kind === 'hours' ? ' selected' : '') + '>gives ' + esc(unitWord(2)) + '</option><option value="owes"' + (kind === 'owes' ? ' selected' : '') + '>owes only</option><option value="buyout"' + (kind === 'buyout' ? ' selected' : '') + '>paid the buyout</option></select> ' +
+      (kind === 'hours' || kind === 'owes' ? '<input type="number" min="0" step="0.5" data-role-hrs="' + i + '" value="' + esc(r.credit) + '" aria-label="Hours given">' : '') + '</td>' +
+      '<td><button class="linkbtn" data-role-del="' + i + '" aria-label="Remove role">Remove</button></td></tr>';
+  }).join('');
+}
+function ruleInput(e){
+  var t = e.target, r = S.rules, id = t.id, v = t.value;
+  var numFields = {rFirst: 'first', rExtra: 'extra', rBond: 'bondFirst', rBondX: 'bondExtra', rPerHour: 'perHour', rLight: 'light', rEventMin: 'eventMin'};
+  var textFields = {rLightDivs: 'lightDivs', rNoBond: 'noBondDivs', rExclude: 'excludeActs', rEvent: 'eventName', rOrg: 'org', rSign: 'signoff', rDeadline: 'deadline'};
+  if(numFields[id]){ r[numFields[id]] = v === '' ? 0 : Math.max(0, +v || 0); }
+  else if(id === 'rCap') r.cap = v === '' ? '' : Math.max(0, +v || 0);
+  else if(id === 'rBondCap') r.bondCap = v === '' ? '' : Math.max(0, +v || 0);
+  else if(textFields[id]) r[textFields[id]] = v.slice(0, 160);
+  else if(id === 'rEventExempt') r.eventExempt = t.checked;
+  else if(id === 'rExclEv') r.excludeAtEvent = t.checked;
+  else if(id === 'rUnit'){ r.unit = v; renderUnitWords(); renderRoles(); }
+  else if(id === 'rShort'){ r.shortRule = v; $('perHourWrap').hidden = v !== 'perhour'; }
+  else if(id === 'rSame') r.sameShift = v;
+  else if(t.dataset.roleName != null){ r.roles[+t.dataset.roleName].name = v.slice(0, 40); }
+  else if(t.dataset.roleHrs != null){ r.roles[+t.dataset.roleHrs].credit = Math.max(0, +v || 0); }
+  else if(t.dataset.roleKind != null){ var x = r.roles[+t.dataset.roleKind]; x.credit = v === 'full' ? 'full' : v === 'buyout' ? 'buyout' : (typeof x.credit === 'number' ? x.credit : 4); if(v === 'owes') x.owes = true; else delete x.owes; renderRoles(); }
+  else return false;
+  var fieldOf = {rFirst: 'first', rExtra: 'extra', rCap: 'cap', rUnit: 'unit', rBond: 'bondFirst', rBondX: 'bondExtra', rBondCap: 'bondCap', rShort: 'shortRule', rPerHour: 'perHour', rDeadline: 'deadline',
+    rLightDivs: 'lightDivs', rLight: 'light', rNoBond: 'noBondDivs', rExclude: 'excludeActs', rExclEv: 'excludeAtEvent', rEvent: 'eventName', rEventMin: 'eventMin', rEventExempt: 'eventExempt', rSame: 'sameShift', rOrg: 'org', rSign: 'signoff'};
+  S.edited[fieldOf[id] || 'roles'] = 1;
+  trackFirst('rules-edit');
+  save(); recompute(); renderOut(); return true;
+}
+
+/* ---------- step 2: families ---------- */
+function readFam(){
+  var txt = $('famText').value;
+  if(!txt.trim()){ $('famMsg').innerHTML = '<span class="err">Paste the family list first.</span>'; return; }
+  if(txt.trim() === exampleFamText().trim()){ $('famMsg').innerHTML = '<span class="err">That is the made-up example list. Paste your own families.</span>'; return; }
+  var r = BH.readFamilies(txt);
+  if(!r.families.length){ $('famMsg').innerHTML = '<span class="err">Couldn\'t find any families in that. Is there a name column?</span>'; $('famWarn').innerHTML = warnHTML(r.warnings); return; }
+  leaveExample();
+  // carry hand-made choices over to the new family ids (review r1 K15)
+  var mig = BH.migrateIds(S.families, r.families), lostRoles = 0, lostRows = 0;
+  var rs = {}; Object.keys(S.roleSet).forEach(function(k){ if(mig.map[k]) rs[mig.map[k]] = S.roleSet[k]; else lostRoles++; }); S.roleSet = rs;
+  S.entries.forEach(function(e){ if(e.fid){ if(mig.map[e.fid]) e.fid = mig.map[e.fid]; else { delete e.fid; lostRows++; } } });
+  Object.keys(S.aliases).forEach(function(k){ if(mig.map[S.aliases[k]]) S.aliases[k] = mig.map[S.aliases[k]]; else delete S.aliases[k]; });
+  S.families = r.families; S.famText = txt.slice(0, 400000);
+  var warn = r.warnings.slice();
+  var unknown = {}; r.families.forEach(function(f){ f.roles.forEach(function(x){ if(!S.rules.roles.some(function(y){ return BH.normName(y.name) === BH.normName(x); })) unknown[x] = (unknown[x] || 0) + 1; }); });
+  var uk = Object.keys(unknown);
+  if(uk.length) warn.unshift('Role values not in step 1, so they give nothing yet: ' + uk.slice(0, 12).map(function(x){ return '"' + x + '" (' + unknown[x] + ')'; }).join(', ') + '. Add them under "roles that cover the bond", spelled the same, and they apply at once.');
+  if(lostRoles || lostRows) warn.unshift((lostRoles ? lostRoles + ' role pick' + (lostRoles === 1 ? '' : 's') : '') + (lostRoles && lostRows ? ' and ' : '') + (lostRows ? lostRows + ' hand-matched shift' + (lostRows === 1 ? '' : 's') : '') + ' belonged to families that are no longer in the list.');
+  $('famMsg').innerHTML = '<span class="ok">' + r.families.length + ' families, ' + r.families.reduce(function(s, f){ return s + f.athletes.length; }, 0) + ' athletes.</span>';
+  $('famMap').innerHTML = r.mapping ? '<b>Read as:</b> ' + esc(r.mapping) : '';
+  $('famWarn').innerHTML = warnHTML(warn);
+  if(r.families.length >= 2){ started(); trackFirst('families-read'); }
+  if(!isPro() && r.families.length > FREE_FAMILIES) trackOnce('pro-limit');
+  save(); renderAll();
+}
+function warnHTML(list){ return list.map(function(w){ return '<div class="warn">' + esc(w) + '</div>'; }).join(''); }
+function renderFamPreview(){
+  if(!S.families.length){ $('famPreview').innerHTML = ''; return; }
+  var show = S.families.slice(0, 8);
+  $('famPreview').innerHTML = '<table class="preview"><thead><tr><th>Family</th><th>Parents</th><th>Email</th><th>Athletes</th><th>Team</th><th>Role</th></tr></thead><tbody>' +
+    show.map(function(f){ return '<tr><td>' + esc(f.name) + (f.guessed ? ' <i>(guessed)</i>' : '') + '</td><td>' + esc(f.parents.join(', ')) + '</td><td>' + esc(f.emails.join(' ')) + '</td><td>' +
+      esc(f.athletes.map(function(a){ return (a.name ? a.name + ' ' : '') + (a.division ? '(' + a.division + ')' : ''); }).join(', ') || f.athletes.length) + '</td><td>' + esc((f.teams || [f.team]).join(', ')) + '</td><td>' + esc(rolesOf(f).join(', ')) + '</td></tr>'; }).join('') +
+    '</tbody></table>' + (S.families.length > show.length ? '<p style="font-size:15px">…and ' + (S.families.length - show.length) + ' more. Check a few against your list.</p>' : '');
+}
+
+/* ---------- step 3: log ---------- */
+function sig(e){ return [BH.normName(e.name), (e.email || '').toLowerCase(), BH.dateKey(e.date), BH.normName(e.event), BH.normName(e.activity), e.hours, BH.normName(e.start)].join('|'); }
+function readLog(){
+  var txt = $('logText').value;
+  if(!txt.trim()){ $('logMsg').innerHTML = '<span class="err">Paste the shifts first.</span>'; return; }
+  var r = BH.readLog(txt, {rowHours: $('rowHours').value, maxHours: S.rules.unit === 'hours' ? 24 : 200});
+  if(r.errors.length || !r.entries.length){
+    $('logMsg').innerHTML = '<span class="err">' + esc(r.errors[0] || 'Couldn\'t find any shifts in that. Is there a name column?') + '</span>';
+    $('logWarn').innerHTML = warnHTML(r.warnings); return;
+  }
+  leaveExample();
+  // running totals ("Volunteer | Hours" kept as a total): undated rows for names that already have undated rows from an earlier paste (review r2 #7)
+  var undatedBefore = {}; S.entries.forEach(function(e){ if(!BH.dateKey(e.date)) undatedBefore[BH.normName(e.name) || e.email] = 1; });
+  var undatedNow = r.entries.filter(function(e){ return !BH.dateKey(e.date); });
+  var again = undatedNow.filter(function(e){ return undatedBefore[BH.normName(e.name) || e.email]; }).length;
+  if(undatedNow.length && again >= Math.max(2, undatedNow.length / 2) && !$('logText').dataset.ok){
+    $('logText').dataset.ok = '1';
+    $('logMsg').innerHTML = '<span class="err">' + again + ' of these undated rows are for people already in the log from an earlier paste. If this sheet keeps running totals, remove the earlier paste first (open "The log" below, "Remove this paste"). If they really are new shifts, press "Add these shifts" again.</span>';
+    return;
+  }
+  delete $('logText').dataset.ok;
+  // a re-paste adds only what is new: count identical rows here and in the log (review r2 code #3); rows deleted before stay deleted (review r2 #6c)
+  var have = {}, haveB = {}; S.entries.forEach(function(e){ var k = sig(e); have[k] = (have[k] || 0) + 1; haveB[k] = e.batch; });
+  var seen = {}, batch = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), added = 0, skipped = 0, deletedSkip = 0;
+  r.entries.forEach(function(e){
+    var k = sig(e); seen[k] = (seen[k] || 0) + 1;
+    if(seen[k] <= (have[k] || 0)){ skipped++; return; }
+    if(S.deleted[k] && seen[k] - (have[k] || 0) <= S.deleted[k]){ deletedSkip++; return; }
+    e.batch = have[k] ? haveB[k] : batch; S.entries.push(e); added++;   // an extra copy of a row already there (another game that day) joins that row's paste
+  });
+  if(added){ var first = r.entries[0]; S.batches.push({id: batch, label: 'Paste ' + (S.batches.length + 1) + ' (' + r.entries.length + ' rows, starts "' + String(first.name || first.email).slice(0, 24) + '")', at: Date.now()}); }
+  $('logText').value = '';
+  $('logMsg').innerHTML = '<span class="ok">Added ' + added + ' shift' + (added === 1 ? '' : 's') + '.</span>' + (skipped ? ' Skipped ' + skipped + ' already in the log.' : '') + (deletedSkip ? ' Left out ' + deletedSkip + ' you deleted before.' : '');
+  $('logWarn').innerHTML = warnHTML(r.warnings);
+  if(added){ started(); trackFirst('log-read'); }
+  save(); renderAll();
+  if(!S.families.length) say('Shifts saved. Now paste the family list in step 2.');
+}
+function deleteEntries(idxs){
+  var del = {}; idxs.forEach(function(i){ del[i] = 1; var e = S.entries[i]; if(e && e.batch !== 'manual'){ var k = sig(e); S.deleted[k] = (S.deleted[k] || 0) + 1; } });
+  S.entries = S.entries.filter(function(e, i){ return !del[i]; });
+}
+function quickAdd(){
+  var fid = $('qFam').value, h = BH.parseHours($('qHrs').value);
+  var f = S.families.filter(function(x){ return x.id === fid; })[0];
+  if(!f){ say('Pick a family first (paste the family list in step 2).'); return; }
+  if(!(h > 0 && h <= 24)){ say('Hours should be between 0 and 24.'); return; }
+  var e = {name: f.parents[0] || (f.name + ' family'), email: f.emails[0] || '', date: $('qDate').value, event: '', activity: $('qWhat').value.trim().slice(0, 60), hours: Math.round(h * 100) / 100, start: '', how: 'manual', batch: 'manual', fid: f.id};
+  S.entries.push(e);
+  started(); trackFirst('hours-added'); save(); renderAll(); say('Added ' + BH.fmtH(e.hours) + ' for ' + f.name + '.');
+}
+function renderQuick(){
+  var cur = $('qFam').value;
+  $('qFam').innerHTML = '<option value="">Pick a family</option>' + S.families.slice().sort(function(a, b){ return a.name.localeCompare(b.name); }).map(function(f){
+    return '<option value="' + esc(f.id) + '"' + (f.id === cur ? ' selected' : '') + '>' + esc(famLabel(f)) + '</option>'; }).join('');
+  var acts = {}; S.entries.forEach(function(e){ if(e.activity) acts[e.activity] = 1; });
+  ['Scorekeeper', 'Timekeeper', 'Shot clock', 'Bottle drive', 'Tournament', 'Canteen'].forEach(function(a){ acts[a] = 1; });
+  $('qWhatList').innerHTML = Object.keys(acts).slice(0, 60).map(function(a){ return '<option value="' + esc(a) + '">'; }).join('');
+  if(!$('qDate').value){ try{ $('qDate').value = new Date().toISOString().slice(0, 10); }catch(e){} }
+}
+function famLabel(f){ return f.name + (f.parents[0] ? ' (' + f.parents[0] + ')' : '') + (f.team ? ' · ' + (f.teams || [f.team]).join(', ') : ''); }
+function renderLog(){
+  $('logSum').textContent = 'The log: ' + S.entries.length + ' shift' + (S.entries.length === 1 ? '' : 's') + ', ' + BH.fmtH(S.entries.reduce(function(s, e){ return s + e.hours; }, 0)) + ' ' + unitWord(2);
+  var byB = {}; S.entries.forEach(function(e, i){ (byB[e.batch || ''] = byB[e.batch || ''] || []).push(i); });
+  var labels = {manual: 'Added one at a time', ex: 'Example', '': 'Earlier shifts'}; S.batches.forEach(function(b){ labels[b.id] = b.label; });
+  var order = Object.keys(byB).sort(function(a, b){ return Math.max.apply(null, byB[b]) - Math.max.apply(null, byB[a]); });
+  var shown = 0;
+  $('logList').innerHTML = order.map(function(b){
+    var rows = byB[b].slice().reverse(), part = rows.slice(0, Math.max(0, 400 - shown)); shown += part.length;
+    return '<div class="bh"><span>' + esc(labels[b] || 'Paste') + ' · ' + rows.length + ' shift' + (rows.length === 1 ? '' : 's') + '</span>' + (b !== 'manual' ? '<button class="linkbtn" data-rmbatch="' + esc(b) + '">Remove this paste</button>' : '') + '</div>' +
+      part.map(function(i){ var e = S.entries[i];
+        return '<div><span class="w">' + esc([e.name || e.email, e.date, [e.event, e.activity].filter(Boolean).join(' ')].filter(Boolean).join(' · ')) + (e.long ? ' <b class="err">(over 12 h, check)</b>' : '') + '</span><span class="num">' + esc(BH.fmtH(e.hours)) + '</span><button data-del="' + i + '" aria-label="Delete this shift">✕</button></div>'; }).join('');
+  }).join('') + (S.entries.length > 400 ? '<div>…older shifts not shown here; they still count.</div>' : '');
+  var al = Object.keys(S.aliases);
+  $('aliasBox').innerHTML = al.length ? '<p class="lbl" style="margin-top:14px">Remembered names</p>' + al.map(function(k){ var f = S.families.filter(function(x){ return x.id === S.aliases[k]; })[0];
+    return '<div class="row" style="font-size:15px">' + esc(k.slice(2)) + ' → ' + esc(f ? f.name : '(gone)') + ' <button class="linkbtn" data-unalias="' + esc(k) + '">Forget</button></div>'; }).join('') : '';
+}
+
+/* ---------- the cheque box ---------- */
+function money(x){ return BH.money(x); }
+function beforeDeadline(){ return !!S.rules.deadline && !BH.deadlinePassed(S.rules); }
+function renderBox(){
+  var t = RES.totals, u = unitWord(2), cut = freeIds();
+  var h = '<h2>The cheque box</h2>';
+  if(!S.families.length){ $('box').innerHTML = h + '<p>Paste your families in step 2 and the lists appear here.</p>'; $('dock').innerHTML = '<span>No families yet</span><a href="#s2">Step 2</a>'; return; }
+  h += '<dl class="tally">' +
+    '<dt>Hand back</dt><dd class="r">' + (t.ret + t.exempt) + '</dd><div class="sub">' + t.ret + ' did the ' + esc(u) + ', ' + t.exempt + ' exempt by role</div>' +
+    (beforeDeadline() ? '<dt>Still short</dt><dd class="c">' + t.short + '</dd><div class="sub">' + esc(BH.fmtH(t.hoursMissing)) + ' ' + esc(u) + ' to go · ' + money(t.cashAmount) + ' if nothing changes</div>'
+                      : '<dt>Cash</dt><dd class="c">' + t.short + '</dd><div class="sub">' + money(t.cashAmount) + ' kept · ' + esc(BH.fmtH(t.hoursMissing)) + ' ' + esc(u) + ' missing</div>') +
+    '<dt>Bought out / no bond</dt><dd>' + (t.buyout + t.nobond) + '</dd>' +
+    '</dl>';
+  var need = [];
+  if(t.unmatched) need.push('<b>' + t.unmatched + '</b> shift' + (t.unmatched === 1 ? '' : 's') + ' not matched to a family' + (t.suggest ? ' (' + t.suggest + ' with a likely family)' : '') + '. <a href="#unmatched">Sort them</a>');
+  if(t.dupes) need.push(t.dupes + ' duplicate shift' + (t.dupes === 1 ? '' : 's') + ' counted once');
+  if(t.excluded) need.push(t.excluded + ' shift' + (t.excluded === 1 ? '' : 's') + ' in jobs that don\'t count');
+  if(t.longs) need.push('<b>' + t.longs + '</b> shift' + (t.longs === 1 ? '' : 's') + ' over 12 hours: check the log');
+  if(cut) need.push('Free lists ' + Object.keys(cut).length + ' of ' + S.families.length + ' families (whole teams). <a href="#proSec">Pro</a> covers all.');
+  if(need.length) h += '<div class="need">' + need.join('<br>') + '</div>';
+  h += '<a class="btn" href="#results">See the lists</a>';
+  if(S.rules.deadline) h += '<p class="ex">Deadline ' + esc(BH.niceDate(S.rules.deadline)) + daysLeft(S.rules.deadline) + '</p>';
+  $('box').innerHTML = h;
+  $('dock').innerHTML = '<span><b>' + (t.ret + t.exempt) + '</b> back · <b>' + t.short + '</b> ' + (beforeDeadline() ? 'short' : 'cash') + (t.unmatched ? ' · <b>' + t.unmatched + '</b> to sort' : '') + '</span><a href="#results">Lists</a>';
+}
+function daysLeft(iso){
+  var d = new Date(iso + 'T23:59:59'); if(isNaN(d)) return '';
+  var n = Math.ceil((d - new Date()) / 864e5);
+  return n > 0 ? ' (' + n + ' days left)' : n === 0 ? ' (today)' : ' (passed)';
+}
+
+/* ---------- results ---------- */
+var FILTER = 'all', OPEN = {};
+var STAMP = {short: 'Cash', done: 'Hand back', exempt: 'Exempt', buyout: 'Bought out', nobond: 'No bond'};
+function stampFor(st){ return st === 'short' && beforeDeadline() ? 'Short' : STAMP[st]; }
+function visibleFamilies(){ var keep = freeIds(); return keep ? RES.families.filter(function(r){ return keep[r.id]; }) : RES.families.slice(); }
+function teamsOf(f){ return (f.teams && f.teams.length) ? f.teams : [f.team || 'No team listed']; }
+function renderList(){
+  if(!S.families.length){ $('list').innerHTML = '<p>No families yet. Paste them in <a href="#s2">step 2</a>.</p>'; $('unmatched').innerHTML = ''; return; }
+  renderUnmatched();
+  var list = visibleFamilies().filter(function(r){ return FILTER === 'all' || r.status === FILTER || (FILTER === 'buyout' && r.status === 'nobond'); });
+  var order = {short: 0, done: 1, exempt: 2, buyout: 3, nobond: 4};
+  var teams = {};
+  var cut = !!freeIds();
+  list.forEach(function(r){ (cut ? [r.fam.team || 'No team listed'] : teamsOf(r.fam)).forEach(function(t){ (teams[t] = teams[t] || []).push(r); }); });   // a family with kids on two teams shows on both (free: only its first team)
+  var h = Object.keys(teams).sort().map(function(t){
+    var rows = teams[t].sort(function(a, b){ return order[a.status] - order[b.status] || a.fam.name.localeCompare(b.fam.name); });
+    var nShort = rows.filter(function(r){ return r.status === 'short'; }).length;
+    return '<div class="team"><h3>' + esc(t) + '</h3><span>' + rows.length + ' famil' + (rows.length === 1 ? 'y' : 'ies') + (nShort ? ' · ' + nShort + ' short' : '') + '</span></div>' + rows.map(function(r){ return stubHTML(r, t); }).join('');
+  }).join('');
+  if(!list.length) h = '<p>Nobody in this list.</p>';
+  var keep = freeIds();
+  if(keep) h += '<div class="locked"><b>' + (S.families.length - Object.keys(keep).length) + ' more families</b> are in the totals but not listed here. Free covers one team (up to ' + FREE_FAMILIES + ' families). <a href="#proSec">Pro</a> lists the whole association.</div>';
+  $('list').innerHTML = h;
+}
+function stubHTML(r, team){
+  var f = r.fam, u = unitWord(2), pct = r.required > 0 ? Math.min(100, Math.round(r.done / r.required * 100)) : 100;
+  var line = r.status === 'buyout' ? 'Paid the buyout; no cheque held.' :
+             r.status === 'nobond' ? 'No bond in this division.' :
+             r.status === 'exempt' ? 'Covered by role: ' + esc(r.creditRoles.join(', ')) + '. Hand back ' + money(r.bond) + '.' :
+             r.status === 'done' ? esc(BH.fmtH(r.done)) + ' of ' + esc(BH.fmtH(r.required)) + ' ' + esc(u) + '. Hand back ' + money(r.bond) + '.' :
+             esc(BH.fmtH(r.done)) + ' of ' + esc(BH.fmtH(r.required)) + ' ' + esc(u) + (r.missing > 0 ? ', <b>' + esc(BH.fmtH(r.missing)) + ' to go</b>' : '') +
+             (r.eventMissing > 0 ? ', <b>' + esc(BH.fmtH(r.eventMissing)) + ' at ' + esc(S.rules.eventName) + '</b>' : '') + '. ' +
+             (beforeDeadline() ? 'If nothing changes: ' : '') + (r.charge <= 0 ? 'no charge under your rule.' : r.charge >= r.bond ? 'cash ' + money(r.bond) + '.' : 'keep ' + money(r.charge) + ', refund ' + money(r.returnAmount) + '.');
+  var other = teamsOf(f).filter(function(t){ return t !== team; });
+  var roles = rolesOf(f);
+  var chips = roles.map(function(x, i){ var known = S.rules.roles.some(function(y){ return BH.normName(y.name) === BH.normName(x); });
+    return '<span class="chip" style="font-size:13px;min-height:0;padding:1px 8px;margin:2px 4px 0 0;display:inline-block">' + esc(x) + (known ? '' : ' (not in step 1)') + ' <button class="linkbtn" data-unrole="' + esc(r.id) + '" data-i="' + i + '" aria-label="Remove role">×</button></span>'; }).join('');
+  var opts = '<option value="">+ role</option>' + S.rules.roles.filter(function(x){ return x.name && !roles.some(function(y){ return BH.normName(y) === BH.normName(x.name); }); }).map(function(x){ return '<option>' + esc(x.name) + '</option>'; }).join('');
+  var h = '<div class="stub ' + r.status + '"><span class="stamp">' + stampFor(r.status) + '</span>' +
+    '<div class="who"><b>' + esc(f.name) + '</b> <span class="meta">' + esc(f.parents.join(' & ')) + ' · ' + esc(f.athletes.map(function(a){ return a.name; }).filter(Boolean).join(', ') || (f.athletes.length + ' athlete' + (f.athletes.length === 1 ? '' : 's'))) +
+    (other.length ? ' · also on ' + esc(other.join(', ')) : '') + (teamsOf(f).length > 1 && team !== teamsOf(f)[0] ? ' · cheque with ' + esc(teamsOf(f)[0]) : '') + '</span>' +
+    (r.status === 'buyout' || r.status === 'exempt' || r.status === 'nobond' ? '' : '<div class="bar" aria-hidden="true"><i style="width:' + pct + '%"></i></div>') + '<div class="fig">' + line + '</div>' + (chips ? '<div>' + chips + '</div>' : '') + '</div>' +
+    '<div class="acts">' + (r.status === 'short' ? '<button class="btn small" data-remind="' + esc(r.id) + '">Copy reminder</button>' : '') +
+    '<button class="btn small ghost" data-open="' + esc(r.id) + '">' + (OPEN[r.id] ? 'Hide shifts' : 'Shifts (' + r.entries.length + ')') + '</button>' +
+    '<select data-addrole="' + esc(r.id) + '" aria-label="Add a role for ' + esc(f.name) + '">' + opts + '</select></div>';
+  if(OPEN[r.id]){
+    h += '<div class="detail">' + (r.entries.length ? r.entries.map(function(x){ var e = x.entry;
+      return '<div>' + (x.counted ? '' : '<s>') + esc([e.date, [e.event, e.activity].filter(Boolean).join(' ') || 'shift', e.name].filter(Boolean).join(' · ')) + ' — ' + esc(BH.fmtH(e.hours)) + ' ' + esc(u) + (x.counted ? '' : '</s> (' + esc(x.why) + ')') +
+        ' <i>(' + ({email: 'email', name: 'full name', saved: 'remembered name', chosen: 'you matched this'}[x.how] || x.how) + ')</i>' +
+        (x.how === 'chosen' || x.how === 'saved' ? ' <button class="linkbtn" data-unmatch="' + x.idx + '">Unmatch</button>' : '') + '</div>'; }).join('') : 'No shifts yet.') +
+      (r.status === 'short' ? '<pre>' + esc(BH.reminderText(r, S.rules)) + '</pre>' : '') + '</div>';
+  }
+  return h + '</div>';
+}
+function renderUnmatched(){
+  var un = RES.unmatched;
+  if(!un.length){ $('unmatched').innerHTML = ''; return; }
+  var famOpts = S.families.slice().sort(function(a, b){ return a.name.localeCompare(b.name); });
+  var byId = {}; S.families.forEach(function(f){ byId[f.id] = f; });
+  // group rows with the same name AND the same reason, so one pick fixes them; only these rows move (review r1 K1)
+  var groups = {}, order = [];
+  var labels = {manual: 'added by hand', ex: 'example'}; S.batches.forEach(function(b){ labels[b.id] = b.label.replace(/ \(.*$/, ''); });
+  // a first name alone ("Kathy") from two sheets can be two people: never grouped across pastes (review r2 #2)
+  un.forEach(function(x){ var spec = BH.specificName(x.entry.name) || (!x.entry.name && x.entry.email);
+    var k = BH.entryKey(x.entry) + '|' + x.how + '|' + x.candidates.join(',') + (spec ? '' : '|' + (x.entry.batch || ''));
+    if(!groups[k]){ groups[k] = {rows: [], cands: x.candidates, how: x.how, name: x.entry.name || x.entry.email, email: x.entry.email, batch: spec ? '' : (x.entry.batch || '')}; order.push(k); } groups[k].rows.push(x.idx); });
+  var sugg = order.filter(function(k){ return groups[k].how === 'suggest' && groups[k].cands.length === 1; });
+  var why = {suggest: 'surname only', weak: 'surname only, and the first name is nobody in that family', ambiguous: 'name fits more than one family', conflict: 'the email belongs to one family, the name to another or to nobody', none: 'no family with this name or email'};
+  $('unmatched').innerHTML = '<div class="unm" id="unmatchedBox"><h3>Needs you: ' + un.length + ' shift' + (un.length === 1 ? '' : 's') + ' with no family</h3>' +
+    '<p style="margin:4px 0 8px">These are not counted until you pick a family. Full names you pick are remembered for later pastes.</p>' +
+    (sugg.length ? '<p><button class="btn small" id="acceptAll">' + (sugg.length === 1 ? 'Accept the likely match' : 'Accept all ' + sugg.length + ' likely matches') + '</button> <span style="font-size:15px">(' + esc(sugg.slice(0, 6).map(function(k){ return groups[k].name + ' → ' + (byId[groups[k].cands[0]] || {}).name; }).join('; ')) + (sugg.length > 6 ? '…' : '') + ')</span></p>' : '') +
+    order.slice(0, 80).map(function(k){ var g = groups[k], hrs = g.rows.reduce(function(s, i){ return s + S.entries[i].hours; }, 0);
+      var cand = famOpts.filter(function(f){ return g.cands.indexOf(f.id) >= 0; });
+      var dates = g.rows.map(function(i){ return S.entries[i].date; }).filter(Boolean).slice(0, 4).join(', ');
+      return '<div class="u"><span><b>' + esc(g.name) + '</b>' + (g.email && g.name !== g.email ? ' &lt;' + esc(g.email) + '&gt;' : '') + ' · ' + g.rows.length + ' shift' + (g.rows.length === 1 ? '' : 's') + ', ' + esc(BH.fmtH(hrs)) + ' ' + esc(unitWord(2)) +
+        (dates ? ' (' + esc(dates) + ')' : '') + (g.batch ? ' · from ' + esc(labels[g.batch] || 'a paste') : '') +
+        ' · ' + esc(why[g.how] || g.how) + (cand.length ? ': ' + esc(cand.map(function(f){ return famLabel(f); }).join(' or ')) : '') + '</span>' +
+        '<select data-assign="' + esc(g.rows.join(',')) + '" data-name="' + esc(g.name) + '" aria-label="Family for ' + esc(g.name) + '"><option value="">Which family?</option>' +
+        cand.concat(famOpts.filter(function(f){ return cand.indexOf(f) < 0; })).map(function(f){ return '<option value="' + esc(f.id) + '">' + esc(famLabel(f)) + '</option>'; }).join('') +
+        '<option value="__drop">Not a family: delete these shifts</option></select></div>'; }).join('') +
+    (order.length > 80 ? '<p>…and ' + (order.length - 80) + ' more names.</p>' : '') + '</div>';
+  $('unmatched').dataset.sugg = JSON.stringify(sugg.map(function(k){ return {rows: groups[k].rows, fid: groups[k].cands[0], name: groups[k].name}; }));
+}
+function assignRows(rows, fid, name){
+  if(fid === '__drop'){
+    deleteEntries(rows);
+    say('Deleted ' + rows.length + ' shift' + (rows.length === 1 ? '' : 's') + '.');
+  } else {
+    rows.forEach(function(i){ if(S.entries[i]) S.entries[i].fid = fid; });
+    if(name && BH.specificName(name)) S.aliases['n:' + BH.normName(name)] = fid;     // remember full names only (not "Smith family", not "J. Smith")
+    trackFirst('unmatched-fixed');
+  }
+}
+
+/* ---------- outputs ---------- */
+function proOnlyBulk(what){ if(!freeIds()) return false; proGate(what); return true; }
+function usedLists(){ trackFirst('lists-used'); }
+function copy(text, okMsg){
+  function fallback(){ var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); say(okMsg); }catch(e){ say('Copy failed; select the text by hand.'); } document.body.removeChild(ta); }
+  try{ if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(function(){ say(okMsg); }, fallback); } else fallback(); }catch(e){ fallback(); }
+}
+function subjectFor(r){ return 'Volunteer bond' + (S.rules.org ? ' (' + S.rules.org + ')' : '') + ': ' + BH.fmtH(Math.max(r.missing, r.eventMissing)) + ' ' + unitWord(2) + (BH.deadlinePassed(S.rules) ? ' missing' : ' to go'); }
+function remindOne(id){
+  var r = RES.families.filter(function(x){ return x.id === id; })[0]; if(!r) return;
+  copy((r.fam.emails.length ? 'To: ' + r.fam.emails.join(', ') + '\nSubject: ' + subjectFor(r) + '\n\n' : '') + BH.reminderText(r, S.rules), 'Reminder copied. Paste it into your email.');
+  if(!S.example) track('reminder-copy');
+  usedLists();
+}
+function remindAll(){
+  if(proOnlyBulk('Copying every reminder at once')) return;
+  var list = visibleFamilies().filter(function(r){ return r.status === 'short'; });
+  if(!list.length){ say('Nobody is short. Nice.'); return; }
+  copy(list.map(function(r){ return '==== ' + r.fam.name + (r.fam.emails.length ? ' <' + r.fam.emails.join(', ') + '>' : ' (no email)') + ' ====\nSubject: ' + subjectFor(r) + '\n\n' + BH.reminderText(r, S.rules); }).join('\n\n'), list.length + ' reminders copied.');
+  if(!S.example) track('reminders-all');
+  usedLists();
+}
+function copyEmails(){
+  if(proOnlyBulk('Copying the emails of every short family')) return;
+  var list = visibleFamilies().filter(function(r){ return r.status === 'short'; }), em = [], none = [];
+  list.forEach(function(r){ if(!r.fam.emails.length) none.push(r.fam.name + (r.fam.parents[0] ? ' (' + r.fam.parents[0] + ')' : '')); r.fam.emails.forEach(function(e){ if(em.indexOf(e) < 0) em.push(e); }); });
+  $('bulkNote').innerHTML = none.length ? '<div class="warn"><b>' + none.length + ' short famil' + (none.length === 1 ? 'y has' : 'ies have') + ' no email</b> in your list: ' + esc(none.join(', ')) + '. Reach them another way.</div>' : '';
+  if(!em.length){ say(list.length ? 'The short families have no emails in your list.' : 'Nobody is short.'); return; }
+  copy(em.join(', '), em.length + ' emails copied. Paste them into BCC.');
+  if(!S.example) track('emails-copy');
+  usedLists();
+}
+function csv(){
+  if(proOnlyBulk('The CSV for the whole association')) return;
+  download(new Blob([BH.toCSV({families: visibleFamilies()}, S.rules)], {type: 'text/csv'}), 'bond-hours-' + new Date().toISOString().slice(0, 10) + '.csv');
+  if(!S.example) track('csv');
+  usedLists();
+}
+function shiftsCsv(){
+  download(new Blob([BH.shiftsCSV(RES, S)], {type: 'text/csv'}), 'bond-hours-shifts-' + new Date().toISOString().slice(0, 10) + '.csv');
+  if(!S.example) track('shifts-csv');
+}
+function download(blob, name){ var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+function doWord(r){
+  if(r.status === 'buyout' || r.status === 'nobond') return '—';
+  if(r.status !== 'short') return 'HAND BACK';
+  if(beforeDeadline()) return 'Short ' + BH.fmtH(Math.max(r.missing, r.eventMissing));
+  if(r.charge <= 0) return 'HAND BACK (no charge)';
+  return r.charge >= r.bond ? 'CASH' : 'Deposit, refund ' + money(r.returnAmount);
+}
+function printSheets(){
+  if(proOnlyBulk('Hand-back sheets for every team')) return;
+  var u = unitWord(2), list = visibleFamilies(), teams = {}, home = {};
+  // each cheque belongs to one team: the family's first team; other teams' sheets point there (review r2 #9)
+  list.forEach(function(r){ var ts = teamsOf(r.fam); home[r.id] = ts[0]; ts.forEach(function(t){ (teams[t] = teams[t] || []).push(r); }); });
+  var today = new Date().toLocaleDateString(undefined, {year: 'numeric', month: 'long', day: 'numeric'}), early = beforeDeadline();
+  var asOf = early ? '<p><b>Status as of ' + esc(today) + '. Not final: the deadline is ' + esc(BH.niceDate(S.rules.deadline)) + '. Do not cash anything yet.</b></p>' : '';
+  var foot = '<div class="pa-foot">Printed ' + esc(today) + ' · Bond Hours, samsbench.com/bond-hours</div>';
+  function sumFor(rs){ var s = rs.filter(function(r){ return r.status === 'short'; }); return {n: rs.length, back: rs.filter(function(r){ return r.status === 'done' || r.status === 'exempt'; }).length, short: s.length, kept: s.reduce(function(a, r){ return a + r.charge; }, 0)}; }
+  var all = sumFor(list);
+  var h = '<div class="pa-page"><h1>' + esc(S.rules.org ? S.rules.org + ': ' : '') + 'volunteer bond summary</h1>' + asOf + '<p>' + all.n + ' families. Hand back: ' + all.back + '. ' + (early ? 'Short' : 'Cash') + ': ' + all.short + ' (' + money(all.kept) + (early ? ' at stake' : ' kept') + '). Bought out / no bond: ' + list.filter(function(r){ return r.status === 'buyout' || r.status === 'nobond'; }).length + '.' +
+    (S.rules.deadline && !early ? ' Deadline ' + esc(BH.niceDate(S.rules.deadline)) + '.' : '') + '</p><table><thead><tr><th>Team (cheques held)</th><th>Families</th><th>Hand back</th><th>' + (early ? 'Short' : 'Cash') + '</th><th>' + (early ? 'At stake' : 'Kept') + '</th></tr></thead><tbody>' +
+    Object.keys(teams).sort().map(function(k){ var t = sumFor(teams[k].filter(function(r){ return home[r.id] === k; }));
+      return '<tr><td>' + esc(k) + '</td><td>' + t.n + '</td><td>' + t.back + '</td><td>' + t.short + '</td><td>' + money(t.kept) + '</td></tr>'; }).join('') +
+    '<tr><td><b>Total</b></td><td><b>' + all.n + '</b></td><td><b>' + all.back + '</b></td><td><b>' + all.short + '</b></td><td><b>' + money(all.kept) + '</b></td></tr></tbody></table>' + foot + '</div>';
+  h += Object.keys(teams).sort().map(function(k){
+    var rs = teams[k].slice().sort(function(a, b){ return a.fam.name.localeCompare(b.fam.name); });
+    return '<div class="pa-page"><h1>' + esc(k) + ': bond cheques</h1>' + asOf + '<table><thead><tr><th>Family</th><th>Athletes</th><th>' + esc(cap1(u)) + '</th><th>Cheque</th><th>Do</th><th class="sig">Received by / date</th></tr></thead><tbody>' +
+      rs.map(function(r){ var mine = home[r.id] === k;
+        return '<tr><td>' + esc(r.fam.name) + (r.fam.parents.length ? '<br><small>' + esc(r.fam.parents.join(' & ')) + '</small>' : '') + '</td><td>' +
+        esc(r.fam.athletes.map(function(a){ return [a.name, a.division].filter(Boolean).join(' '); }).filter(Boolean).join(', ') || r.fam.athletes.length) + '</td><td>' +
+        (r.status === 'buyout' || r.status === 'nobond' ? '—' : r.status === 'exempt' ? 'Exempt (' + esc(r.creditRoles.join(', ')) + ')' : esc(BH.fmtH(r.done)) + ' / ' + esc(BH.fmtH(r.required))) + '</td><td>' +
+        (mine ? (r.bond ? money(r.bond) : 'none') : 'with ' + esc(home[r.id])) + '</td><td><b>' + (mine ? esc(doWord(r)) : '—') + '</b></td><td class="sig"></td></tr>'; }).join('') +
+      '</tbody></table>' + foot + '</div>';
+  }).join('');
+  $('printArea').innerHTML = h;
+  if(!S.example) track('print-sheets');
+  usedLists();
+  setTimeout(function(){ window.print(); }, 50);
+}
+function mergeCsv(){
+  if(proOnlyBulk('The mail-merge file')) return;
+  var list = visibleFamilies().filter(function(r){ return r.status === 'short'; });
+  if(!list.length){ say('Nobody is short. Nice.'); return; }
+  var rows = [['Email', 'Family', 'Subject', 'Body']].concat(list.map(function(r){ return [r.fam.emails.join(', '), r.fam.name, subjectFor(r), BH.reminderText(r, S.rules)]; }));
+  var txt = rows.map(function(row){ return row.map(function(c){ c = String(c == null ? '' : c); if(/^[=+\-@]/.test(c)) c = "'" + c; return '"' + c.replace(/"/g, '""') + '"'; }).join(','); }).join('\n') + '\n';
+  download(new Blob([txt], {type: 'text/csv'}), 'bond-hours-reminders-' + new Date().toISOString().slice(0, 10) + '.csv');
+  var none = list.filter(function(r){ return !r.fam.emails.length; }).length;
+  say(list.length + ' reminders in the file' + (none ? '; ' + none + ' have no email' : '') + '. Use it with Gmail or Outlook mail merge.');
+  if(!S.example) track('merge-csv');
+  usedLists();
+}
+
+/* ---------- pro ---------- */
+function buyUrl(){
+  var a = ''; try{ a = (new URLSearchParams(location.search).get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40); }catch(e){}
+  return a ? CHECKOUT_PLAN + '?a=' + encodeURIComponent(a) : CHECKOUT_HOME;
+}
+function renderPro(){
+  $('buyLink').href = buyUrl(); $('proPrice').textContent = PRICE; $('freeN').textContent = FREE_FAMILIES;
+  if(isPro()){
+    $('proBuy').hidden = true;
+    $('proState').innerHTML = '<p class="ok">Pro is on for this browser' + (PRO.email ? ' (' + esc(PRO.email) + ')' : '') + '. Thank you.</p><p>On another computer, enter the same email or code there.</p>';
+  } else {
+    $('proBuy').hidden = false;
+    $('proState').innerHTML = /[?&]bought=1/.test(location.search) ? '<p class="ok">Thanks for buying! Enter the email you paid with to unlock.</p>' : '';
+  }
+}
+function proGate(why){ trackOnce('pro-limit'); say(why + ' is part of Pro (' + PRICE + ' once).'); $('proSec').scrollIntoView({behavior: 'smooth'}); }
+function sha256hex(s){
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(function(buf){ return Array.prototype.map.call(new Uint8Array(buf), function(b){ return ('0' + b.toString(16)).slice(-2); }).join(''); });
+}
+var unlocking = false;
+function unlock(){
+  var v = $('proKey').value.trim(), msg = $('proMsg');
+  if(unlocking) return;
+  if(!v){ msg.innerHTML = '<span class="err">Type the email you paid with, or your gift code.</span>'; return; }
+  if(v.indexOf('@') < 0){
+    if(!window.crypto || !crypto.subtle){ msg.innerHTML = '<span class="err">This browser can\'t check codes. Try another browser.</span>'; return; }
+    sha256hex(v.toUpperCase().replace(/\s+/g, '')).then(function(hx){
+      if(GIFT.indexOf(hx) >= 0){ PRO = {gift: hx.slice(0, 12)}; lsSet(PROKEY, PRO); track('pro-gift'); track('gift-' + hx.slice(0, 8)); msg.textContent = ''; renderAll(); say('Pro unlocked. Enjoy!'); }
+      else msg.innerHTML = '<span class="err">That code didn\'t match. Check the email it came in, or use the email you paid with.</span>';
+    });
+    return;
+  }
+  unlocking = true; msg.textContent = 'Checking…';
+  fetch(VERIFY_URL, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({app: APP_KEY, email: v})})
+    .then(function(r){ if(!r.ok) throw new Error('http ' + r.status); return r.json(); })
+    .then(function(j){
+      unlocking = false;
+      if(j && j.ok && j.valid){ PRO = {email: v.toLowerCase()}; lsSet(PROKEY, PRO); track('pro-unlocked'); msg.textContent = ''; renderAll(); say('Pro unlocked. Thank you!'); }
+      else if(j && j.ok){ track('pro-notfound'); msg.innerHTML = '<span class="err">No purchase found for that email. Use the email you typed at checkout. Just paid? Wait a minute and try again.</span>'; }
+      else throw new Error('bad reply');
+    }).catch(function(){ unlocking = false; msg.innerHTML = '<span class="err">Couldn\'t reach the checker. Check your connection and try again.</span>'; });
+}
+
+/* ---------- backup ---------- */
+function backup(){
+  download(new Blob([JSON.stringify(S, null, 1)], {type: 'application/json'}), 'bond-hours-backup-' + new Date().toISOString().slice(0, 10) + '.json');
+  if(!S.example) track('backup');
+}
+function restore(file){
+  var rd = new FileReader();
+  rd.onload = function(){
+    var st = null; try{ st = JSON.parse(rd.result); }catch(e){}
+    if(!valid(st)){ say('That file isn\'t a Bond Hours backup.'); return; }
+    if(!S.example && S.families.length && !confirm('Replace what is here with the backup?')) return;
+    var old = S, oldText = $('famText').value; S = st; $('famText').value = S.famText || '';
+    try{ renderAll(); }catch(e){ S = old; $('famText').value = oldText; renderAll(); say('That backup could not be shown, so nothing was changed.'); return; }   // render first, save only if it worked (review r1 K18)
+    save(); say('Backup restored: ' + S.families.length + ' families, ' + S.entries.length + ' shifts.'); track('restore');
+  };
+  rd.readAsText(file);
+}
+
+/* ---------- misc ---------- */
+var toastT = 0;
+function say(m){ var t = $('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(function(){ t.style.display = 'none'; }, 3600); }
+function renderOut(){ renderBox(); renderList(); renderRuleCounts(); }
+function renderRuleCounts(){
+  var t = RES.totals, out = [];
+  if(String(S.rules.eventName || '').trim()) out.push(t.evShifts + ' shift' + (t.evShifts === 1 ? '' : 's') + ' match the must-do event' + (t.evShifts ? '' : ' (check the name against your log)'));
+  if(String(S.rules.excludeActs || '').trim()) out.push(t.excluded + ' shift' + (t.excluded === 1 ? '' : 's') + ' in jobs that don\'t count');
+  $('ruleCounts').textContent = out.join(' · ');
+}
+function renderAll(){
+  recompute();
+  $('exBar').hidden = !S.example;
+  if(S.example) $('famText').value = S.famText;
+  else if(!$('famText').value) $('famText').value = S.famText || '';
+  renderRules(); renderFamPreview(); renderQuick(); renderLog(); renderOut(); renderPro();
+}
+
+/* ---------- events ---------- */
+document.addEventListener('input', function(e){ if(e.target.type !== 'checkbox' && e.target.tagName !== 'SELECT') ruleInput(e); });
+document.addEventListener('change', function(e){
+  var t = e.target;
+  if(t.dataset.assign != null){
+    var v = t.value; if(!v) return;
+    assignRows(t.dataset.assign.split(',').map(Number), v, t.dataset.name);
+    save(); recompute(); renderOut(); renderLog(); return;
+  }
+  if(t.dataset.addrole != null){
+    var id = t.dataset.addrole, f = S.families.filter(function(x){ return x.id === id; })[0]; if(!f || !t.value) return;
+    S.roleSet[id] = rolesOf(f).concat([t.value]);
+    trackFirst('role-set'); save(); recompute(); renderOut(); renderFamPreview(); return;
+  }
+  if(t.id === 'restoreFile' && t.files && t.files[0]){ restore(t.files[0]); t.value = ''; return; }
+  if(t.type === 'checkbox' || t.tagName === 'SELECT') ruleInput(e);
+});
+document.addEventListener('click', function(e){
+  var t = e.target.closest('button,a'); if(!t) return;
+  if(t.id === 'readFam'){ readFam(); return; }
+  if(t.id === 'readLog'){ readLog(); return; }
+  if(t.id === 'qAdd'){ quickAdd(); return; }
+  if(t.id === 'clearEx'){ leaveExample(); $('famText').value = ''; save(); renderAll(); $('s2').scrollIntoView({behavior: 'smooth'}); $('famText').focus(); track('clear-example'); return; }
+  if(t.id === 'addRole'){ S.rules.roles.push({name: '', credit: 4}); renderRoles(); var ins = document.querySelectorAll('[data-role-name]'); if(ins.length) ins[ins.length - 1].focus(); return; }
+  if(t.dataset.roleDel != null){ S.rules.roles.splice(+t.dataset.roleDel, 1); S.edited.roles = 1; save(); renderRoles(); recompute(); renderOut(); return; }
+  if(t.dataset.del != null){ deleteEntries([+t.dataset.del]); save(); renderLog(); recompute(); renderOut(); return; }
+  if(t.dataset.rmbatch != null){ var bb = t.dataset.rmbatch, n0 = S.entries.length; S.entries = S.entries.filter(function(e){ return (e.batch || '') !== bb; }); S.batches = S.batches.filter(function(x){ return x.id !== bb; }); save(); renderAll(); say('Removed ' + (n0 - S.entries.length) + ' shifts. Paste the new version now.'); return; }
+  if(t.dataset.unalias != null){ delete S.aliases[t.dataset.unalias]; save(); renderLog(); recompute(); renderOut(); return; }
+  if(t.dataset.unmatch != null){ var en = S.entries[+t.dataset.unmatch]; if(en){ delete en.fid; var k = 'n:' + BH.normName(en.name); delete S.aliases[k]; } save(); renderLog(); recompute(); renderOut(); return; }
+  if(t.dataset.unrole != null){ var fid = t.dataset.unrole, ff = S.families.filter(function(x){ return x.id === fid; })[0]; if(ff){ var rl = rolesOf(ff).slice(); rl.splice(+t.dataset.i, 1); S.roleSet[fid] = rl; save(); recompute(); renderOut(); renderFamPreview(); } return; }
+  if(t.id === 'acceptAll'){ var sg = []; try{ sg = JSON.parse($('unmatched').dataset.sugg || '[]'); }catch(x){} sg.forEach(function(g){ assignRows(g.rows, g.fid, g.name); }); save(); recompute(); renderOut(); renderLog(); say('Accepted ' + sg.length + ' likely matches. Undo any with "Unmatch" in the family\'s shifts.'); return; }
+  if(t.dataset.remind != null){ remindOne(t.dataset.remind); return; }
+  if(t.dataset.open != null){ OPEN[t.dataset.open] = !OPEN[t.dataset.open]; renderList(); return; }
+  if(t.dataset.f){ FILTER = t.dataset.f; Array.prototype.forEach.call(document.querySelectorAll('.filters .chip'), function(c){ c.setAttribute('aria-pressed', c.dataset.f === FILTER ? 'true' : 'false'); }); renderList(); return; }
+  if(t.id === 'bPrint'){ printSheets(); return; }
+  if(t.id === 'bRemind'){ remindAll(); return; }
+  if(t.id === 'bEmails'){ copyEmails(); return; }
+  if(t.id === 'bCsv'){ csv(); return; }
+  if(t.id === 'bMerge'){ mergeCsv(); return; }
+  if(t.id === 'bShifts'){ shiftsCsv(); return; }
+  if(t.id === 'bBackup'){ backup(); return; }
+  if(t.id === 'bWipe'){ if(confirm('Erase every family, shift and rule saved in this browser?')){ S = blank(); $('famText').value = ''; save(); renderAll(); say('Erased.'); } return; }
+  if(t.id === 'btnUnlock'){ unlock(); return; }
+  if(t.id === 'buyLink'){ track('buy-click'); return; }
+});
+$('proKey').addEventListener('keydown', function(e){ if(e.key === 'Enter') unlock(); });
+
+renderAll();
+try{ var seenPro = false; new IntersectionObserver(function(es){ es.forEach(function(x){ if(x.isIntersecting && !seenPro && !isPro()){ seenPro = true; track('pro-view'); } }); }).observe($('proSec')); }catch(e){}
+if(GC_CODE && !SKIP){ var gs = document.createElement('script'); gs.async = true; gs.src = '//gc.zgo.at/count.js'; gs.setAttribute('data-goatcounter', 'https://' + GC_CODE + '.goatcounter.com/count'); document.head.appendChild(gs); }
+(function(){
+  var q = new URLSearchParams(location.search);
+  var via = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
+  if(via) track('via-' + via);
+  if(af) track('aff-' + af);
+  if(RETURNING){ var o = lsGet(ONCEKEY, {}), day = new Date().toISOString().slice(0, 10); if(o.rv !== day){ o.rv = day; lsSet(ONCEKEY, o); track('return-visit'); } }   // once a day
+  if(q.get('bought') === '1'){ var bk = 'bh.boughtSeen'; if(!lsGet(bk, 0)){ lsSet(bk, 1); track('bought-return'); } }   // once per browser: back from Whop checkout
+  if(q.get('bought') === '1' && !isPro()) setTimeout(function(){ $('proSec').scrollIntoView(); $('proKey').focus(); }, 400);
+  if(via.indexOf('selftest') === 0 && q.get('fire') === 'all'){   // live check only: every event once under its .selftest name; the plain counts stay clean
+    SELFTEST_EVENTS.forEach(function(n){ QUEUE.push(n + '.' + via); }); drain();
+  }
+})();
+window.BHA = {state: function(){ return S; }, res: function(){ return RES; }, pending: function(){ return QUEUE.length + (SENDING ? 1 : 0); }, queue: function(){ return QUEUE.slice(); }};   // for tests
+})();
+</script>
+</body>
+</html>
