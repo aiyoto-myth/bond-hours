@@ -1106,7 +1106,10 @@ var SKIP = (function(){ try{ return localStorage.getItem('skipgc') === 't'; }cat
 /* Hits leave one at a time, 700 ms apart: GoatCounter's /count takes about 4 a second per visitor and drops the rest (bizz-handbell, 11-24). */
 function track(name){
   if(SKIP) return;
-  try{ if(SRC && FUNNEL_EV[name]) QUEUE.push(name + '.' + SRC); QUEUE.push(name); drain(); }catch(e){}
+  try{
+    if(SRC.indexOf('selftest') === 0){ QUEUE.push(name.indexOf('via-') === 0 || name.indexOf('.selftest') >= 0 ? name : name + '.' + SRC); drain(); return; }   // a selftest browser never adds to the plain counts (11-25: a plain pro-view leaked)
+    if(SRC && FUNNEL_EV[name]) QUEUE.push(name + '.' + SRC); QUEUE.push(name); drain();
+  }catch(e){}
 }
 function drain(){
   if(SENDING || !QUEUE.length) return;
