@@ -162,6 +162,8 @@ details.more summary{cursor:pointer;font-weight:700;color:var(--navy);padding:6p
 .faq{margin:28px 0}
 .faq details{background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin:8px 0}
 .faq summary{cursor:pointer;font-weight:700}
+.share{margin:24px 0 0;padding:14px 16px;border:1px dashed var(--navy);border-radius:8px}
+.share p{margin:0 0 10px}
 footer{margin:30px 0 20px;font-size:15px;color:var(--ink2)}
 .toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:6px;font-weight:700;z-index:30;max-width:90vw;display:none}
 .exbar{background:var(--amberBg);border:2px solid var(--amber);border-radius:8px;padding:10px 14px;margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
@@ -347,6 +349,11 @@ footer{margin:30px 0 20px;font-size:15px;color:var(--ink2)}
       <input type="file" id="restoreFile" accept=".json,application/json" hidden>
       <button class="btn small ghost" id="bWipe">Erase everything here</button>
     </div>
+  </section>
+
+  <section class="share" id="shareSec">
+    <p><b>Know the volunteer coordinator at another association?</b> Send them the tool. It works the same for them, and their families' names stay on their computer.</p>
+    <button class="btn small ghost" id="bShare">Copy a link to send them</button>
   </section>
 
   <footer>Bond Hours is a small independent tool from samsbench.com. It does arithmetic on what you paste; your association's policy decides.</footer>
@@ -1069,14 +1076,30 @@ function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return tr
 
 /* ---------- measurement (GoatCounter). The ?via code follows the visitor down the funnel (kept 60 days). ---------- */
 var GC_CODE = 'bondhours';
-var SRC = (function(){ try{
-  var q = new URLSearchParams(location.search), v = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20) || (q.get('a') ? 'aff' : '');
-  if(v){ localStorage.setItem('bh.src', JSON.stringify({v: v, t: Date.now()})); return v; }
-  var o = JSON.parse(localStorage.getItem('bh.src') || 'null');
-  return (o && Date.now() - o.t < 60 * 864e5) ? o.v : '';
-}catch(e){ return ''; } })();
-var FUNNEL_EV = {'bought-return':1, 'tool-start':1, 'families-read':1, 'log-read':1, 'reckoned':1, 'lists-used':1, 'return-visit':1, 'pro-view':1, 'pro-limit':1, 'buy-click':1, 'pro-unlocked':1, 'pro-gift':1};
-var SELFTEST_EVENTS = ['bought-return', 'tool-start', 'families-read', 'log-read', 'reckoned', 'lists-used', 'return-visit', 'pro-view', 'pro-limit', 'buy-click', 'pro-unlocked', 'pro-gift',
+/* Letters (FACTORY 7, 11-25): each recipient gets their own code bhNNN and a second one to pass on, bhNNN-s. The landing event keeps
+   the personal code (via-bh012 / via-bh012-s); funnel events use the group (.bhmail / .bhshare) so the per-batch tests stay one row.
+   A browser that already came in on bh012 and then opens bh012-s is the recipient checking their own share link: no via-bh012-s. */
+var VIA_EV = '';
+function viaGroup(v){ var m = /^bh(\d{3})(-s)?$/.exec(v); return m ? (m[2] ? 'bhshare' : 'bhmail') : v; }
+var SRC = (function(){
+  var v = '';
+  try{ v = (new URLSearchParams(location.search).get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20); }catch(e){}
+  VIA_EV = v;
+  try{
+    var m = /^bh(\d{3})(-s)?$/.exec(v), seen = JSON.parse(localStorage.getItem('bh.vias') || '[]');
+    if(!Array.isArray(seen)) seen = [];
+    if(m && !m[2] && seen.indexOf(v) < 0){ seen.push(v); localStorage.setItem('bh.vias', JSON.stringify(seen.slice(-20))); }
+    if(m && m[2] && seen.indexOf('bh' + m[1]) >= 0){ VIA_EV = ''; v = 'bh' + m[1]; }   // own share link: still their own visit
+  }catch(e){}
+  try{
+    if(!v && new URLSearchParams(location.search).get('a')) v = 'aff';
+    if(v){ localStorage.setItem('bh.src', JSON.stringify({v: v, t: Date.now()})); return viaGroup(v); }
+    var o = JSON.parse(localStorage.getItem('bh.src') || 'null');
+    return (o && Date.now() - o.t < 60 * 864e5) ? viaGroup(o.v) : '';
+  }catch(e){ return viaGroup(v); }
+})();
+var FUNNEL_EV = {'bought-return':1, 'tool-start':1, 'families-read':1, 'log-read':1, 'reckoned':1, 'lists-used':1, 'return-visit':1, 'pro-view':1, 'pro-limit':1, 'buy-click':1, 'pro-unlocked':1, 'pro-gift':1, 'share-copy':1};
+var SELFTEST_EVENTS = ['bought-return', 'tool-start', 'families-read', 'log-read', 'reckoned', 'lists-used', 'return-visit', 'pro-view', 'pro-limit', 'buy-click', 'pro-unlocked', 'pro-gift', 'share-copy',
   'hours-added', 'unmatched-fixed', 'role-set', 'rules-edit', 'reminder-copy', 'reminders-all', 'emails-copy', 'csv', 'merge-csv', 'shifts-csv', 'print-sheets', 'backup', 'restore', 'clear-example', 'pro-notfound'];
 var ONCE = {}, QUEUE = [], SENDING = false, GC_READY = 0, GC_WAIT = 0;
 var SKIP = (function(){ try{ return localStorage.getItem('skipgc') === 't'; }catch(e){ return false; } })();   // hand testing: set localStorage.skipgc = 't'
@@ -1539,6 +1562,11 @@ function copy(text, okMsg){
   function fallback(){ var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); say(okMsg); }catch(e){ say('Copy failed; select the text by hand.'); } document.body.removeChild(ta); }
   try{ if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(function(){ say(okMsg); }, fallback); } else fallback(); }catch(e){ fallback(); }
 }
+/* the link a recipient passes on carries their own code + "-s", so the ledger can see who spread it (FACTORY 7) */
+function shareLink(){
+  var own = ''; try{ var seen = JSON.parse(localStorage.getItem('bh.vias') || '[]'); if(Array.isArray(seen) && seen.length) own = String(seen[seen.length - 1]); }catch(e){}
+  return 'https://samsbench.com/bond-hours/?via=' + (/^bh\d{3}$/.test(own) ? own + '-s' : 'share');
+}
 function subjectFor(r){ return 'Volunteer bond' + (S.rules.org ? ' (' + S.rules.org + ')' : '') + ': ' + BH.fmtH(Math.max(r.missing, r.eventMissing)) + ' ' + unitWord(2) + (BH.deadlinePassed(S.rules) ? ' missing' : ' to go'); }
 function remindOne(id){
   var r = RES.families.filter(function(x){ return x.id === id; })[0]; if(!r) return;
@@ -1749,6 +1777,10 @@ document.addEventListener('click', function(e){
   if(t.id === 'btnUnlock'){ unlock(); return; }
   if(t.id === 'buyLink'){ track('buy-click'); return; }
 });
+$('bShare').addEventListener('click', function(){
+  copy(shareLink(), 'Link copied. Paste it into an email or message.');
+  var o = lsGet(ONCEKEY, {}); if(!o['share-copy']){ o['share-copy'] = Date.now(); lsSet(ONCEKEY, o); track('share-copy'); }   // counted even on the example
+});
 $('proKey').addEventListener('keydown', function(e){ if(e.key === 'Enter') unlock(); });
 
 renderAll();
@@ -1757,7 +1789,7 @@ if(GC_CODE && !SKIP){ var gs = document.createElement('script'); gs.async = true
 (function(){
   var q = new URLSearchParams(location.search);
   var via = (q.get('via') || '').replace(/[^a-z0-9-]/g, '').slice(0, 20), af = (q.get('a') || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
-  if(via) track('via-' + via);
+  if(VIA_EV) track('via-' + VIA_EV);
   if(af) track('aff-' + af);
   if(RETURNING){ var o = lsGet(ONCEKEY, {}), day = new Date().toISOString().slice(0, 10); if(o.rv !== day){ o.rv = day; lsSet(ONCEKEY, o); track('return-visit'); } }   // once a day
   if(q.get('bought') === '1'){ var bk = 'bh.boughtSeen'; if(!lsGet(bk, 0)){ lsSet(bk, 1); track('bought-return'); } }   // once per browser: back from Whop checkout
