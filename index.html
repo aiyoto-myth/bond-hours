@@ -1587,7 +1587,7 @@ function printSheets(){
   var u = unitWord(2), list = visibleFamilies(), teams = {}, home = {};
   // each cheque belongs to one team: the family's first team; other teams' sheets point there (review r2 #9)
   list.forEach(function(r){ var ts = teamsOf(r.fam); home[r.id] = ts[0]; ts.forEach(function(t){ (teams[t] = teams[t] || []).push(r); }); });
-  var today = new Date().toLocaleDateString(undefined, {year: 'numeric', month: 'long', day: 'numeric'}), early = beforeDeadline();
+  var today = new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'}), early = beforeDeadline();
   var asOf = early ? '<p><b>Status as of ' + esc(today) + '. Not final: the deadline is ' + esc(BH.niceDate(S.rules.deadline)) + '. Do not cash anything yet.</b></p>' : '';
   var foot = '<div class="pa-foot">Printed ' + esc(today) + ' · Bond Hours, samsbench.com/bond-hours</div>';
   function sumFor(rs){ var s = rs.filter(function(r){ return r.status === 'short'; }); return {n: rs.length, back: rs.filter(function(r){ return r.status === 'done' || r.status === 'exempt'; }).length, short: s.length, kept: s.reduce(function(a, r){ return a + r.charge; }, 0)}; }
